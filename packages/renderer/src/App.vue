@@ -1,31 +1,31 @@
 <template>
-  <img
-    alt="Vue logo"
-    src="../assets/logo.svg"
-    width="300"
-  >
-  <app-navigation />
-  <router-view />
+  <div class="p-m-0 p-p-0 p-col p-nogutter">
+    <top-bar />
+    <router-view />
+  </div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import AppNavigation from '/@/components/AppNavigation.vue';
+import TopBar from '/@/components/TopBar.vue';
+
 export default defineComponent({
   name: 'App',
   components: {
-    AppNavigation,
+    TopBar,
   },
 });
 </script>
 
 <style>
+body {
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
 }
 </style>
