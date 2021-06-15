@@ -4,6 +4,9 @@
     class="p-m-0 p-p-0"
   >
     <template #left>
+      <div class="p-mx-2">
+        xLights Color Palette Editor
+      </div>
       <p-btn>Hey</p-btn>
     </template>
   </toolbar>
