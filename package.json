@@ -34,6 +34,7 @@
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.27.0",
     "@vitejs/plugin-vue": "^1.2.3",
     "cross-env": "^7.0.3",
     "electron": "^13.1.2",
@@ -50,6 +51,9 @@
   },
   "dependencies": {
     "electron-updater": "^4.3.9",
+    "primeflex": "^2.0.0",
+    "primeicons": "^4.1.0",
+    "primevue": "^3.5.1",
     "vue": "^3.0.11",
     "vue-router": "^4.0.8"
   }
