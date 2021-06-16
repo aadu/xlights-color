@@ -4,7 +4,7 @@ import { State } from "./index";
 import { RootState } from "/@/store";
 
 export enum ActionTypes {
-  setValue = "GENERIC__SET_VALUE",
+  setCurrent = "WORKSPACES__SET_VALUE",
 }
 
 // !!! AUGUMENTED ACTION CONTEXT !!!
@@ -16,14 +16,14 @@ type AugmentedActionContext = {
 } & Omit<ActionContext<State, RootState>, "commit">;
 
 export interface Actions {
-  [ActionTypes.setValue](
+  [ActionTypes.setCurrent](
     { commit }: AugmentedActionContext,
-    payload: any
+    payload: string
   ): void;
 }
 
 export const actions: ActionTree<State, RootState> & Actions = {
-  [ActionTypes.setValue]({ commit }, payload) {
-    commit(MutationTypes.VALUE, payload);
+  [ActionTypes.setCurrent]({ commit }, payload) {
+    commit(MutationTypes.SET_CURRENT, payload);
   },
 };

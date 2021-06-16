@@ -9,36 +9,57 @@
       </div>
     </template>
     <template #right>
+      <span v-text="currentWorkspace" class="p-mr-2" />
       <p-btn class="p-mr-2" @click="setDirectory">Set Directory</p-btn>
     </template>
   </toolbar>
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
+import {defineComponent, computed, watchEffect} from 'vue';
 import Toolbar from 'primevue/toolbar';
 import useStore from "/@/store";
 import { ActionTypes as Workspaces } from "/@/store/modules/workspaces/index";
 import {useElectron} from '/@/use/electron';
 
+
+
 export default defineComponent({
   name: 'TopBar',
   components: { Toolbar },
   setup () {
+    const store = useStore();
 
-    function setDirectory() {
-      const store = useStore();
-      const {dialog} = useElectron();
-      const result = dialog.showOpenDialog({
+    async function setDirectory() {
+      const electron = useElectron();
+      console.log('electron', electron)
+      const result = await electron.dialog.showOpenDialog({
         title: 'Select xLights Color Palette Directory',
         properties: ['openDirectory', 'createDirectory', 'promptToCreate']
       })
-      console.log('result', result)
-      if (result && result.length) {
-        store.dispatch(Workspaces.setData, result[0]);
+      if (!result.canceled && result.filePaths.length) {
+        const path = result.filePaths[0]
+        store.dispatch(Workspaces.setCurrent, path);
       }
     }
-    return { setDirectory }
+
+    async function readDirectory(path: string | undefined) {
+      if (!path) return []
+      const files = await electron.readdir(path)
+      const results: Record<string, string> = {}
+      for (const file of files.filter((f: string) => f.match(/\.xpalette$/))) {
+        results[file] = (await electron.readFile(`${path}/${file}`, {encoding: 'utf-8'}))
+      }
+      console.log('results', results)
+      return results
+    }
+
+    const currentWorkspace = computed(() => store.state.workspaces.current);
+    watchEffect(async () => {
+        await readDirectory(currentWorkspace.value)
+      });
+
+    return { setDirectory, currentWorkspace }
 
   }
 });

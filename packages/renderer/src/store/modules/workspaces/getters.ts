@@ -3,11 +3,11 @@ import { State } from "./index";
 import { RootState } from "/@/store";
 
 export type Getters<S = State> = {
-  value(state: S): any;
+  currentWorkspace(state: S): string | undefined;
 };
 
 export const getters: GetterTree<State, RootState> & Getters = {
-  value: (state) => {
-    return state.value;
+  currentWorkspace: (state) => {
+    return state.current;
   },
 };

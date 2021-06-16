@@ -1,4 +1,5 @@
-import {contextBridge, dialog} from 'electron';
+import {contextBridge, remote} from 'electron';
+import { readdir, readFile } from 'fs/promises'
 
 const apiKey = 'electron';
 /**
@@ -6,7 +7,9 @@ const apiKey = 'electron';
  */
 const api: ElectronApi = {
   versions: process.versions,
-  dialog
+  dialog: remote.dialog,
+  readdir,
+  readFile
 };
 
 if (import.meta.env.MODE !== 'test') {

@@ -10,11 +10,11 @@ import {
 import { RootState } from "/@/store";
 
 export interface State {
-  value: any;
+  current: string | undefined;
 }
 
 const state: State = {
-  value: "",
+  current: undefined
 };
 
 const workspaces: Module<State, RootState> = {
