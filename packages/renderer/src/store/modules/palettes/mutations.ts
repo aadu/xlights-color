@@ -55,19 +55,20 @@ export const mutations: MutationTree<State> & Mutations = {
     state.list = [];
   },
   [MutationTypes.ADD_COLOR](state, payload) {
-    const palette = state.list.filter((p) => p.filename === payload.palette)[0]
-    palette.colors.push({...payload.color})
+    const index = state.list.findIndex(_ => _.filename === payload.palette);
+    state.list[index].colors.push({...payload.color})
   },
   [MutationTypes.SET_COLORS](state, payload) {
-    const palette = state.list.filter((p) => p.filename === payload.palette)[0]
-    palette.colors = [...payload.colors];
+    const index = state.list.findIndex(_ => _.filename === payload.palette);
+    state.list[index].colors = [...payload.colors]
+    console.log('SET_COLORS', state.list[index].colors.map((color) => color.value))
   },
   [MutationTypes.REMOVE_COLOR](state, payload) {
-    const palette = state.list.filter((p) => p.filename === payload.palette)[0]
-    palette.colors = palette.colors.splice(payload.index, 1);
+    const index = state.list.findIndex(_ => _.filename === payload.palette);
+    state.list[index].colors = state.list[index].colors.splice(payload.index, 1);
   },
   [MutationTypes.CLEAR_COLORS](state, payload) {
-    const palette = state.list.filter((p) => p.filename === payload.palette)[0]
-    palette.colors = []
+    const index = state.list.findIndex(_ => _.filename === payload.palette);
+    state.list[index].colors = []
   },
 };

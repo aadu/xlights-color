@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed, watchEffect} from 'vue';
+import {defineComponent, computed} from 'vue';
 import Toolbar from 'primevue/toolbar';
 import useStore from "/@/store";
 import { ActionTypes as Workspaces } from "/@/store/modules/workspaces/index";
@@ -32,7 +32,6 @@ export default defineComponent({
 
     async function setDirectory() {
       const electron = useElectron();
-      console.log('electron', electron)
       const result = await electron.dialog.showOpenDialog({
         title: 'Select xLights Color Palette Directory',
         properties: ['openDirectory', 'createDirectory', 'promptToCreate']
@@ -42,25 +41,8 @@ export default defineComponent({
         store.dispatch(Workspaces.setCurrent, path);
       }
     }
-
-    async function readDirectory(path: string | undefined) {
-      if (!path) return []
-      const files = await electron.readdir(path)
-      const results: Record<string, string> = {}
-      for (const file of files.filter((f: string) => f.match(/\.xpalette$/))) {
-        results[file] = (await electron.readFile(`${path}/${file}`, {encoding: 'utf-8'}))
-      }
-      console.log('results', results)
-      return results
-    }
-
     const currentWorkspace = computed(() => store.state.workspaces.current);
-    watchEffect(async () => {
-        await readDirectory(currentWorkspace.value)
-      });
-
     return { setDirectory, currentWorkspace }
-
   }
 });
 </script>
