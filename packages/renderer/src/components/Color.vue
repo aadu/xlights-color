@@ -1,13 +1,15 @@
 <template>
-  <Card class="p-ma-0" :style="style" @contextmenu="toggle">
-    <template #content>
-      {{ hex }}
-    </template>
-  </Card>
-  <OverlayPanel ref="op">
-    <ColorPicker v-model="value" :inline="true" />
-  </OverlayPanel>
-
+<Card class="p-m-0 p-p-0 palette-color" :style="style" @contextmenu="toggle">
+  <template #content>
+    {{ hex }}
+    <svg v-if="index >= 8" class="overlay" width="150" height="83">
+      <line x1="0" y1="100%" x2="100%" y2="0" style="stroke:rgb(255,0,0);stroke-width:2"/>
+    </svg>
+  </template>
+</Card>
+<OverlayPanel ref="op">
+  <ColorPicker v-model="value" :inline="true" />
+</OverlayPanel>
 </template>
 
 <script lang="ts">
@@ -29,6 +31,11 @@ export default defineComponent({
     color: {
       type: Object,
       required: true
+    },
+    index: {
+      type: Number,
+      required: false,
+      default: 0
     }
   },
   setup (props, { emit }) {
@@ -69,3 +76,18 @@ export default defineComponent({
   }
 });
 </script>
+<style scoped>
+.palette-color {
+  position: relative;
+  width: 150px;
+}
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: .5s ease;
+  color: white;
+}
+</style>

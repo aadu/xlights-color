@@ -10,14 +10,15 @@
         @end="drag=false"
         class="p-grid palette-container p-d-flex"
         tag="transition-group"
+        :clone="clone"
         :group="{ name: 'palette', pull: pullFunction }"
         :component-data="{ tag: 'ul', name: 'flip-list', type: 'transition' }"
         :animation="0"
         ghostClass="ghost"
         item-key="id">
         <template #item="{element, index}">
-          <div class="p-col p-m-0 p-p-0">
-            <color-card :color="element" @update:color="updateColor($event, index)" />
+          <div class="p-m-0 p-p-0">
+            <color-card :color="element" :index="index" @update:color="updateColor($event, index)" />
           </div>
         </template>
       </draggable>
@@ -75,8 +76,10 @@ export default defineComponent({
     function updateColor(color: Color, index: number) {
       store.dispatch(Palettes.updateColor, {palette: palette.filename, color, index });
     }
-
-    return { palette, name, drag, colors, start, pullFunction, updateColor }
+    function clone({ id, value }: Color) {
+      return new Color(value)
+    }
+    return { palette, name, drag, colors, start, pullFunction, updateColor, clone }
   }
 });
 </script>
