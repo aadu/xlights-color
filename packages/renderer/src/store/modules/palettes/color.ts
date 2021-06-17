@@ -1,8 +1,13 @@
+let id = 0;
+
 export class Color {
   value: string;
+  id: number;
 
   constructor(value: string) {
+    id++
     this.value = value;
+    this.id = id;
   }
 }
 

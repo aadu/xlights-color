@@ -11,11 +11,14 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, reactive, watchEffect} from 'vue';
+import {defineComponent, ref, reactive, computed, watch} from 'vue';
 import ColorPicker from 'primevue/colorpicker';
 import OverlayPanel from 'primevue/overlaypanel';
 import Card from 'primevue/card';
 import chroma from "chroma-js";
+import { Color } from '/@/store/modules/palettes/color';
+import debounce from 'lodash.debounce'
+import useStore from "/@/store";
 
 
 
@@ -28,20 +31,39 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
-    const color = chroma(props.color.value)
-    const op = ref(null)
-    const hex = ref(color.hex())
-    const value = ref(hex)
-    const style = reactive({
-      'background-color': color.hex(),
-      'color': color.luminance() > .5 ? 'black' : 'white'
+  setup (props, { emit }) {
+    const store = useStore();
+    const color = computed(() => {
+      const value = store.state.palettes.colors[props.color.id].value;
+      return chroma(value);
     })
-    watchEffect(() => {
-      console.log('value', value.value)
+    const op = ref(null)
+    const hex = computed(() => color.value.hex())
+    const value = ref(hex.value)
+    // const value = computed({
+    //   get() {
+    //     return color.value.hex()
+    //   },
+    //   set(value: string) {
+    //     emit('update:color', new Color(value))
+    //   }
+    // })
+    const style = computed(() => ({
+      'background-color': color.value.hex(),
+      'color': color.value.luminance() > .5 ? 'black' : 'white'
+    }))
+    const updateColor = debounce(function (value: string) {
+      const color = new Color(value)
+      color.id = props.color.id
+      emit('update:color', color)
+    }, 250)
+    watch(value, (color) => {
+      updateColor(color)
     })
     function toggle(event) {
-      op.value.toggle(event);
+      if (op.value) {
+        op.value.toggle(event);
+      }
     }
     return { style, hex, value, op, toggle }
   }

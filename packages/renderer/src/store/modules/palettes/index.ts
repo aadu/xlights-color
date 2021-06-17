@@ -19,10 +19,12 @@ export interface Palette {
 
 export interface State {
   list: Array<Palette>;
+  colors: Record<number, Color>;
 }
 
 const state: State = {
-  list: []
+  list: [],
+  colors: {}
 };
 
 const palettes: Module<State, RootState> = {

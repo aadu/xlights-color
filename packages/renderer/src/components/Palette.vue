@@ -14,10 +14,10 @@
         :component-data="{ tag: 'ul', name: 'flip-list', type: 'transition' }"
         :animation="0"
         ghostClass="ghost"
-        item-key="value">
-        <template #item="{element}">
+        item-key="id">
+        <template #item="{element, index}">
           <div class="p-col p-m-0 p-p-0">
-              <color-card :color="element" />
+            <color-card :color="element" @update:color="updateColor($event, index)" />
           </div>
         </template>
       </draggable>
@@ -72,7 +72,11 @@ export default defineComponent({
         store.dispatch(Palettes.setColors, {palette: palette.filename, colors: value});
       }
     })
-    return { palette, name, drag, colors, start, pullFunction }
+    function updateColor(color: Color, index: number) {
+      store.dispatch(Palettes.updateColor, {palette: palette.filename, color, index });
+    }
+
+    return { palette, name, drag, colors, start, pullFunction, updateColor }
   }
 });
 </script>

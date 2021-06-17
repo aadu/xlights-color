@@ -10,7 +10,8 @@ export enum MutationTypes {
   ADD_COLOR = "ADD_COLOR",
   REMOVE_COLOR = "REMOVE_COLOR",
   SET_COLORS = "SET_COLORS",
-  CLEAR_COLORS = "CLEAR_COLORS"
+  CLEAR_COLORS = "CLEAR_COLORS",
+  UPDATE_COLOR = "UPDATE_COLOR"
 }
 
 export interface ColorMutation {
@@ -29,6 +30,10 @@ export interface SetColors extends ColorMutation {
   colors: Array<Color>
 }
 
+export interface UpdateColor extends ColorMutation {
+  index: number
+  color: Color
+}
 
 export type Mutations<S = State> = {
   [MutationTypes.ADD](state: S, payload: Palette): void;
@@ -36,6 +41,7 @@ export type Mutations<S = State> = {
   [MutationTypes.REMOVE](state: S, payload: string): void;
   [MutationTypes.CLEAR](state: S): void;
   [MutationTypes.ADD_COLOR](state: S, payload: AddColor): void;
+  [MutationTypes.UPDATE_COLOR](state: S, payload: UpdateColor): void;
   [MutationTypes.SET_COLORS](state: S, payload: SetColors): void;
   [MutationTypes.REMOVE_COLOR](state: S, payload: RemoveColor): void;
   [MutationTypes.CLEAR_COLORS](state: S, payload: ColorMutation): void;
@@ -44,24 +50,43 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.ADD](state, payload) {
     state.list.push({ ...payload })
+    payload.colors.forEach((color: Color) => {
+      state.colors[color.id] = color
+    })
   },
   [MutationTypes.SET](state, payload) {
     state.list = payload;
+    payload.forEach(palette => {
+      palette.colors.forEach((color: Color) => {
+        state.colors[color.id] = color
+      })
+    })
   },
   [MutationTypes.REMOVE](state, payload) {
     state.list = state.list.filter(({ filename }) => filename !== payload)
   },
   [MutationTypes.CLEAR](state) {
     state.list = [];
+    state.colors = [];
   },
   [MutationTypes.ADD_COLOR](state, payload) {
     const index = state.list.findIndex(_ => _.filename === payload.palette);
     state.list[index].colors.push({...payload.color})
+    state.colors[payload.color.id] = payload.color
   },
   [MutationTypes.SET_COLORS](state, payload) {
     const index = state.list.findIndex(_ => _.filename === payload.palette);
     state.list[index].colors = [...payload.colors]
+    payload.colors.forEach((color: Color) => {
+      state.colors[color.id] = color
+    })
     console.log('SET_COLORS', state.list[index].colors.map((color) => color.value))
+  },
+  [MutationTypes.UPDATE_COLOR](state, payload) {
+    const index = state.list.findIndex(_ => _.filename === payload.palette);
+    state.list[index].colors[payload.index] = payload.color;
+    state.colors[payload.color.id] = payload.color
+    console.log('UPDATE_COLOR', payload.color)
   },
   [MutationTypes.REMOVE_COLOR](state, payload) {
     const index = state.list.findIndex(_ => _.filename === payload.palette);
