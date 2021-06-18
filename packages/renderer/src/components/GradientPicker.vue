@@ -1,25 +1,25 @@
 <template>
-  <div class="vue-gpickr">
+  <div class="gradient-picker">
     <color-picker
       v-model="currentColor"
       :preset-colors="null"
     />
 
-    <div class="vue-gpickr-inner-container">
-      <div class="vue-gpickr-preview-container">
+    <div class="gradient-picker-inner-container">
+      <div class="gradient-picker-preview-container">
         <div
-          class="vue-gpickr-preview"
+          class="gradient-picker-preview"
           :style="previewStyle"
         />
       </div>
 
       <div
         ref="stopsContainer"
-        class="vue-gpickr-stops-container"
+        class="gradient-picker-stops-container"
       >
-        <div class="vue-gpickr-stops-preview-container">
+        <div class="gradient-picker-stops-preview-container">
           <div
-            class="vue-gpickr-stops-preview"
+            class="gradient-picker-stops-preview"
             :style="stopsPreviewStyle"
             @click.stop.prevent="addStop($event)"
           />
@@ -27,7 +27,7 @@
         <div
           v-for="(stop, index) in stops"
           :key="index"
-          class="vue-gpickr-stop"
+          class="gradient-picker-stop"
           :style="stopStyle(index)"
           :class="{ active: index == currentStopIdx }"
           @mousedown.stop="handleMouseDown(index, $event)"
@@ -35,8 +35,8 @@
         />
       </div>
 
-      <div class="vue-gpickr-controls-container">
-        <div class="vue-gpickr-slider-container">
+      <div class="gradient-picker-controls-container">
+        <div class="gradient-picker-slider-container">
           <input
             v-model="angle"
             type="range"
@@ -48,7 +48,7 @@
             Angle
           </div>
         </div>
-        <div class="vue-gpickr-input-container">
+        <div class="gradient-picker-input-container">
           <input
             v-model="angle"
             type="text"
@@ -64,8 +64,9 @@
 
 <script lang="ts">
 import { Sketch  } from '@ckpack/vue-color';
-import LinearGradient from './grad';
 import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount } from 'vue';
+import cloneDeep from 'lodash.clonedeep'
+import stringify from 'fast-json-stable-stringify'
 
 const COLOR = 0;
 const POSITION = 1;
@@ -85,8 +86,8 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: LinearGradient,
-      default: () => new LinearGradient(),
+      type: Object,
+      default: () => {},
     },
   },
   emits: ['update:modelValue'],
@@ -97,17 +98,12 @@ export default defineComponent({
     const stops: Stop[] = reactive(defaultStops.slice().map(stop => [...stop]));
     const stopsContainer = ref(null);
 
-
-    const emitInput = (angle, stops) => {
-      const newValue = new LinearGradient(stops, angle);
-      console.log('emitInput', newValue)
-      emit('update:modelValue', newValue);
-      // _angle.value = unref(angle);
-    }
-    // const stops = computed(() => {
-    //   console.log('computedStops')
-    //   return props.modelValue.stops.slice().map(stop => [...stop]);
-    // });
+    watch(() => cloneDeep(stops), (current, previous) => {
+      if (stringify(current) != stringify(previous)) {
+        console.log('stops', current)
+        emit('update:modelValue', current)
+      }
+    }, {deep: true})
 
     const angle = computed({
       get() {
@@ -132,13 +128,12 @@ export default defineComponent({
 
     function getGradientString(angle: number) {
       const stops = orderedStops.value.map(stop => `${stop[COLOR].toString()} ${stop[POSITION] * 100}%`).join(',');
-      console.log('getGradientStringstops', stops)
       return `linear-gradient(${angle}deg, ${stops})`;
     }
+
     const previewStyle = computed(() => {
       return { background: getGradientString(unref(angle)) };
     });
-
 
     const stopsPreviewStyle = computed(() => {
       return { background: getGradientString(90) };
@@ -167,7 +162,6 @@ export default defineComponent({
       const index = stops.length;
       stops.push([unref(currentColor), position]);
       setCurrentStopIdx(index);
-      emitInput(angle, stops);
     }
 
     function handleChange (event) {
@@ -189,26 +183,16 @@ export default defineComponent({
 
       const x = (event.touches ? event.touches[0].clientX : event.clientX) || 0;
       const left = x - containerBoundingClientRectangle.value.left;
-
       const containerWidth = containerBoundingClientRectangle.value.width;
-
-      let position;
-      if (left < 0) {
-        position = 0;
-      } else if (left > containerWidth) {
-        position = 1;
-      } else {
-        position = Math.round(left * 100 / containerWidth) / 100;
-      }
-
+      const position = left < 0 ? 0 : left > containerWidth ? 1 : Math.round(left * 100 / containerWidth) / 100;
       const previousPosition = stops[currentStopIdx.value][POSITION];
       stops[currentStopIdx.value][POSITION] = position;
       if (previousPosition != position) {
-        emitInput(angle, stops);
+        console.debug('update-position')
       }
     }
 
-    function handleMouseDown (index) {
+    function handleMouseDown (index: number) {
       setCurrentStopIdx(index);
       setContainerBoundingClientRectangle();
       window.addEventListener('mousemove', handleChange);
@@ -219,7 +203,7 @@ export default defineComponent({
       unbindEventListeners();
     }
 
-    function handleTouchstart(index) {
+    function handleTouchstart(index: number) {
       setCurrentStopIdx(index);
       setContainerBoundingClientRectangle();
       window.addEventListener('touchmove', handleChange, { passive: false });
@@ -240,17 +224,15 @@ export default defineComponent({
     }
 
     function removeCurrentStop() {
-      stops = stops.splice(currentStopIdx.value, 1);
+      stops.splice(currentStopIdx.value, 1);
       if (currentStopIdx.value > 0) {
         setCurrentStopIdx(currentStopIdx.value - 1);
       }
       unbindEventListeners();
-      emitInput(angle, stops);
     }
 
     function setContainerBoundingClientRectangle() {
       containerBoundingClientRectangle.value = stopsContainer.value.getBoundingClientRect();
-      console.log('containerBoundingClientRectangle', containerBoundingClientRectangle);
     }
 
     onBeforeUnmount(() => {
@@ -260,7 +242,6 @@ export default defineComponent({
     return {
       addStop,
       angle,
-      containerBoundingClientRectangle,
       currentColor,
       currentStopIdx,
       handleChange,
@@ -272,7 +253,6 @@ export default defineComponent({
       stopsContainer,
       previewStyle,
       removeCurrentStop,
-      setContainerBoundingClientRectangle,
       stops,
       stopsPreviewStyle,
       stopStyle,
@@ -304,24 +284,24 @@ export default defineComponent({
     }
   }
 }
-.vue-gpickr {
+.gradient-picker {
   position: relative;
   display: inline-flex;
   flex-direction: row;
   background: #FFF;
   border-radius: 4px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .15), 0 8px 16px rgba(0, 0, 0, .15);
-  .vue-gpickr-inner-container {
+  .gradient-picker-inner-container {
     padding: 10px;
     padding-left: 0;
     user-select: none;
-    .vue-gpickr-preview-container {
+    .gradient-picker-preview-container {
       width: 200px;
       height: 150px;
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMElEQVQ4T2N89uzZfwY8QFJSEp80A+OoAcMiDP7//483HTx//hx/Ohg1gIFx6IcBALl+VXknOCvFAAAAAElFTkSuQmCC);
       background-size: 10px;
       position: relative;
-      .vue-gpickr-preview {
+      .gradient-picker-preview {
         position: absolute;
         top: 0;
         bottom: 0;
@@ -329,9 +309,9 @@ export default defineComponent({
         right: 0;
       }
     }
-    .vue-gpickr-stops-container {
+    .gradient-picker-stops-container {
       position: relative;
-      .vue-gpickr-stops-preview-container {
+      .gradient-picker-stops-preview-container {
         width: 200px;
         height: 24px;
         background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMElEQVQ4T2N89uzZfwY8QFJSEp80A+OoAcMiDP7//483HTx//hx/Ohg1gIFx6IcBALl+VXknOCvFAAAAAElFTkSuQmCC);
@@ -339,7 +319,7 @@ export default defineComponent({
         position: relative;
         margin-top: 4px;
         border-radius: 2px;
-        .vue-gpickr-stops-preview {
+        .gradient-picker-stops-preview {
           position: absolute;
           top: 0;
           bottom: 0;
@@ -349,7 +329,7 @@ export default defineComponent({
           box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15), inset 0 0 4px rgba(0, 0, 0, .25);
         }
       }
-      .vue-gpickr-stop {
+      .gradient-picker-stop {
         position: absolute;
         bottom: 0;
         width: 12px;
@@ -378,11 +358,11 @@ export default defineComponent({
         }
       }
     }
-    .vue-gpickr-controls-container {
+    .gradient-picker-controls-container {
       margin-top: 8px;
       display: flex;
       font-size: 0;
-      .vue-gpickr-slider-container {
+      .gradient-picker-slider-container {
         flex-grow: 1;
         input {
           box-sizing: border-box;
@@ -469,7 +449,7 @@ export default defineComponent({
           }
         }
       }
-      .vue-gpickr-input-container {
+      .gradient-picker-input-container {
         width: 30px;
         margin-left: 8px;
         input {
@@ -495,9 +475,9 @@ export default defineComponent({
   }
 }
 @media (max-width: 430px) {
-  .vue-gpickr {
+  .gradient-picker {
     flex-direction: column;
-    .vue-gpickr-inner-container {
+    .gradient-picker-inner-container {
       padding-left: 10px;
       padding-top: 0;
     }

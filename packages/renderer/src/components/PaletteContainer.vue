@@ -16,7 +16,7 @@ import { parsePalette, Color } from '/@/store/modules/palettes/color';
 import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
 import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
-import {GradientPicker, LinearGradient} from './Gradient/index';
+import GradientPicker from './GradientPicker.vue';
 
 
 
@@ -50,7 +50,7 @@ export default defineComponent({
         await readDirectory(currentWorkspace.value);
       });
 
-    const gradient = reactive(new LinearGradient());
+    const gradient = reactive({});
     watchEffect(() => {
       console.log('gradient changed', gradient)
     })
