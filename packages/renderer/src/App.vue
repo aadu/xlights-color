@@ -1,7 +1,13 @@
 <template>
-  <div class="p-m-0 p-p-0 p-col p-nogutter" id="content-wrapper">
+  <div
+    id="content-wrapper"
+    class="p-m-0 p-p-0 p-col p-nogutter"
+  >
     <top-bar />
-    <div id="content" class="p-m-2 p-p-2">
+    <div
+      id="content"
+      class="p-m-2 p-p-2"
+    >
       <router-view />
     </div>
   </div>

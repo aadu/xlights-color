@@ -9,8 +9,16 @@
       </div>
     </template>
     <template #right>
-      <span v-text="currentWorkspace" class="p-mr-2" />
-      <p-btn class="p-mr-2" @click="setDirectory">Set Directory</p-btn>
+      <span
+        class="p-mr-2"
+        v-text="currentWorkspace"
+      />
+      <p-btn
+        class="p-mr-2"
+        @click="setDirectory"
+      >
+        Set Directory
+      </p-btn>
     </template>
   </toolbar>
 </template>
@@ -18,8 +26,8 @@
 <script lang="ts">
 import {defineComponent, computed} from 'vue';
 import Toolbar from 'primevue/toolbar';
-import useStore from "/@/store";
-import { ActionTypes as Workspaces } from "/@/store/modules/workspaces/index";
+import useStore from '/@/store';
+import { ActionTypes as Workspaces } from '/@/store/modules/workspaces/index';
 import {useElectron} from '/@/use/electron';
 
 
@@ -34,16 +42,16 @@ export default defineComponent({
       const electron = useElectron();
       const result = await electron.dialog.showOpenDialog({
         title: 'Select xLights Color Palette Directory',
-        properties: ['openDirectory', 'createDirectory', 'promptToCreate']
-      })
+        properties: ['openDirectory', 'createDirectory', 'promptToCreate'],
+      });
       if (!result.canceled && result.filePaths.length) {
-        const path = result.filePaths[0]
+        const path = result.filePaths[0];
         store.dispatch(Workspaces.setCurrent, path);
       }
     }
     const currentWorkspace = computed(() => store.state.workspaces.current);
-    return { setDirectory, currentWorkspace }
-  }
+    return { setDirectory, currentWorkspace };
+  },
 });
 </script>
 <style scoped>

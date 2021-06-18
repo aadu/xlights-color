@@ -1,18 +1,19 @@
-import { ActionContext, ActionTree } from "vuex";
-import { Mutations, MutationTypes, ColorMutation, AddColor, RemoveColor, SetColors, UpdateColor } from "./mutations";
-import { State, Palette } from "./index";
-import { RootState } from "/@/store";
+import type { ActionContext, ActionTree } from 'vuex';
+import type { Mutations, ColorMutation, AddColor, RemoveColor, SetColors, UpdateColor } from './mutations';
+import { MutationTypes } from './mutations';
+import type { State, Palette } from './index';
+import type { RootState } from '/@/store';
 
 export enum ActionTypes {
-  add = "PALETTES__ADD",
-  set = "PALETTES__SET",
-  remove = "PALETTES__REMOVE",
-  clear = "PALETTES__CLEAR",
-  addColor = "PALETTES__ADD_COLOR",
-  setColors = "PALETTES__SET_COLOR",
-  removeColor = "PALETTES__REMOVE_COLOR",
-  clearColors = "PALETTES__CLEAR_COLORS",
-  updateColor = "PALETTES__UPDATE_COLOR"
+  add = 'PALETTES__ADD',
+  set = 'PALETTES__SET',
+  remove = 'PALETTES__REMOVE',
+  clear = 'PALETTES__CLEAR',
+  addColor = 'PALETTES__ADD_COLOR',
+  setColors = 'PALETTES__SET_COLOR',
+  removeColor = 'PALETTES__REMOVE_COLOR',
+  clearColors = 'PALETTES__CLEAR_COLORS',
+  updateColor = 'PALETTES__UPDATE_COLOR'
 }
 
 // !!! AUGUMENTED ACTION CONTEXT !!!
@@ -21,7 +22,7 @@ type AugmentedActionContext = {
     key: K,
     payload: Parameters<Mutations[K]>[1]
   ): ReturnType<Mutations[K]>;
-} & Omit<ActionContext<State, RootState>, "commit">;
+} & Omit<ActionContext<State, RootState>, 'commit'>;
 
 export interface Actions {
   [ActionTypes.set](

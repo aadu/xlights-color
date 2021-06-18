@@ -1,10 +1,11 @@
-import { ActionContext, ActionTree } from "vuex";
-import { Mutations, MutationTypes } from "./mutations";
-import { State } from "./index";
-import { RootState } from "/@/store";
+import type { ActionContext, ActionTree } from 'vuex';
+import type { Mutations} from './mutations';
+import { MutationTypes } from './mutations';
+import type { State } from './index';
+import type { RootState } from '/@/store';
 
 export enum ActionTypes {
-  setCurrent = "WORKSPACES__SET_VALUE",
+  setCurrent = 'WORKSPACES__SET_VALUE',
 }
 
 // !!! AUGUMENTED ACTION CONTEXT !!!
@@ -13,7 +14,7 @@ type AugmentedActionContext = {
     key: K,
     payload: Parameters<Mutations[K]>[1]
   ): ReturnType<Mutations[K]>;
-} & Omit<ActionContext<State, RootState>, "commit">;
+} & Omit<ActionContext<State, RootState>, 'commit'>;
 
 export interface Actions {
   [ActionTypes.setCurrent](

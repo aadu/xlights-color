@@ -1,8 +1,8 @@
-import { MutationTree } from "vuex";
-import { State } from "./index";
+import type { MutationTree } from 'vuex';
+import type { State } from './index';
 
 export enum MutationTypes {
-  SET_CURRENT = "SET_CURRENT",
+  SET_CURRENT = 'SET_CURRENT',
 }
 
 export type Mutations<S = State> = {

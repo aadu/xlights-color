@@ -1,7 +1,7 @@
 // vuex.d.ts
 
-import { ComponentCustomProperties } from 'vue'
-import { Store } from 'vuex'
+import { ComponentCustomProperties } from 'vue';
+import type { Store } from 'vuex';
 
 declare module '@vue/runtime-core' {
   // Declare your own store states.

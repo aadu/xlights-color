@@ -1,39 +1,46 @@
 <template>
   <main id="palettes-wrapper">
-    <palette-card v-for="(palette, i) in palettes" :key="i" :palette="palette" />
+    <gradient-picker v-model="gradient" />
+    <palette-card
+      v-for="(palette, i) in palettes"
+      :key="i"
+      :palette="palette"
+    />
   </main>
 </template>
 
 <script lang="ts">
 import {defineComponent, computed, reactive, watchEffect} from 'vue';
-import useStore from "/@/store";
-import { parsePalette, Color } from "/@/store/modules/palettes/color";
+import useStore from '/@/store';
+import { parsePalette, Color } from '/@/store/modules/palettes/color';
 import {useElectron} from '/@/use/electron';
-import PaletteCard from './Palette.vue'
-import { ActionTypes as Palettes } from "/@/store/modules/palettes/index";
+import PaletteCard from './Palette.vue';
+import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
+import {GradientPicker, LinearGradient} from './Gradient/index';
 
 
 
 export default defineComponent({
   name: 'Palettes',
-  components: { PaletteCard },
+  components: { PaletteCard, GradientPicker },
   setup () {
     const store = useStore();
     const electron = useElectron();
+    const gradient = reactive(new LinearGradient({angle: 180}));
 
     async function addPalette(filename: string, dirname: string) {
-        const content = (await electron.readFile(`${dirname}/${filename}`, {encoding: 'utf-8'}))
-        const colors = parsePalette(content)
-        const palette = {filename, dirname, colors}
+        const content = (await electron.readFile(`${dirname}/${filename}`, {encoding: 'utf-8'}));
+        const colors = parsePalette(content);
+        const palette = {filename, dirname, colors};
         store.dispatch(Palettes.add, palette);
 
     }
 
     async function readDirectory(path: string | undefined) {
-      if (!path) return []
-      const files = await electron.readdir(path)
+      if (!path) return [];
+      const files = await electron.readdir(path);
       for (const file of files.filter((f: string) => f.match(/\.xpalette$/))) {
-        await addPalette(file, path)
+        await addPalette(file, path);
       }
     }
 
@@ -41,11 +48,15 @@ export default defineComponent({
     const palettes = computed(() => (store.state.palettes.list));
 
     watchEffect(async () => {
-        await readDirectory(currentWorkspace.value)
+        await readDirectory(currentWorkspace.value);
       });
 
-    return { palettes, currentWorkspace }
+      watchEffect(() => {
+        console.log('gradient changed', gradient);
+      });
 
-  }
+    return { palettes, currentWorkspace, gradient };
+
+  },
 });
 </script>

@@ -5,7 +5,7 @@ export class Color {
   id: number;
 
   constructor(value: string) {
-    id++
+    id++;
     this.value = value;
     this.id = id;
   }
@@ -13,7 +13,7 @@ export class Color {
 
 
 export function parsePalette(contents: string) {
-  const colors = contents.trimEnd().split(/,/)
-  return colors.filter(c => c).map(c => new Color(c))
+  const colors = contents.trimEnd().split(/,/);
+  return colors.filter(c => c).map(c => new Color(c));
 }
 

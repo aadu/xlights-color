@@ -7,7 +7,7 @@ import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
-import { store, key } from './store'
+import { store, key } from './store';
 
 createApp(App)
   .use(router)

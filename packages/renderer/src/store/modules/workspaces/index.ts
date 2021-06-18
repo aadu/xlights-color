@@ -1,20 +1,23 @@
-import { getters, Getters } from "./getters";
-import { mutations, Mutations } from "./mutations";
-import { actions, Actions, ActionTypes } from "./actions";
-import {
+import type { Getters } from './getters';
+import { getters } from './getters';
+import type { Mutations } from './mutations';
+import { mutations } from './mutations';
+import type { Actions} from './actions';
+import { actions, ActionTypes } from './actions';
+import type {
   Store as VuexStore,
   Module,
   CommitOptions,
   DispatchOptions,
-} from "vuex";
-import { RootState } from "/@/store";
+} from 'vuex';
+import type { RootState } from '/@/store';
 
 export interface State {
   current: string | undefined;
 }
 
 const state: State = {
-  current: '/root/xlights-color/palettes'
+  current: '/root/xlights-color/palettes',
 };
 
 const workspaces: Module<State, RootState> = {
@@ -29,7 +32,7 @@ export default workspaces;
 
 export type Store<S = State> = Omit<
   VuexStore<S>,
-  "commit" | "getters" | "dispatch"
+  'commit' | 'getters' | 'dispatch'
 > & {
   commit<K extends keyof Mutations, P extends Parameters<Mutations[K]>[1]>(
     key: K,

@@ -1,6 +1,6 @@
-import { GetterTree } from "vuex";
-import { State, Palette } from "./index";
-import { RootState } from "/@/store";
+import type { GetterTree } from 'vuex';
+import type { State, Palette } from './index';
+import type { RootState } from '/@/store';
 
 export type Getters<S = State> = {
   palettes(state: S): Array<Palette>;
