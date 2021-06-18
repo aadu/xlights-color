@@ -88,7 +88,7 @@ export default defineComponent({
     //   }
     // })
     const style = computed(() => ({
-      'background': col.value.isGradient ? col.value.toString() : color.value.hex(),
+      'background': col.value.stops.length > 1 ? col.value.toString() : color.value.hex(),
       'color': color.value.luminance() > .5 ? 'black' : 'white',
     }));
     const updateColor = debounce(function (value) {
@@ -108,7 +108,6 @@ export default defineComponent({
     const dragging = computed(() => (props.dragging));
 
     watch(dragging, (current, prev) => {
-      console.log('DRAGGING')
       if (current && !prev) {
         op.value.hide();
       }

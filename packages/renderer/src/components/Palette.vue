@@ -82,8 +82,8 @@ export default defineComponent({
     function updateColor(color: Color, index: number) {
       store.dispatch(Palettes.updateColor, {palette: palette.filename, color, index });
     }
-    function clone({ id, value }: Color) {
-      return new Color(value);
+    function clone({ id, value, stops }: Color) {
+      return new Color(value, stops);
     }
     return { palette, name, drag, colors, start, pullFunction, updateColor, clone };
   },

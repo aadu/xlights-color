@@ -2,58 +2,59 @@ import chroma from 'chroma-js';
 
 let id = 0;
 
+export type ColorHex = string;
+export type Position = number;
+export type Stop = [ColorHex, Position];
+export type Stops = Array<Stop>;
+
 export class Color {
-  value: string;
   id: number;
-  isGradient: boolean;
-  isValid: boolean;
+  value: string;
   stops: Array<[string, number]>;
 
-  constructor(value: string, stops: Array<[string, number]> = []) {
+  constructor(value: string, stops: Stops = []) {
     id++;
     this.id = id;
-    this.isValid = false;
-    this.isGradient = false;
-    this.stops = stops;
-    if (stops.length) {
-      this.value = this.stops[0][0];
-      this.isGradient = true;
-      this.isValid = true;
-    } else if (chroma.valid(value)) {
-      this.value = value;
-      this.isGradient = false;
-      this.isValid = true;
+    this.value = value;
+    if(stops.length) {
+      this.stops = stops;
     } else {
-      const result = value.match(/(?<=Values=)([^|]+)/);
-      if (result) {
-        this.stops = result[0].split(';')
-          .map(stop => {
-            const re = stop.match(/(?<=x=)(?<location>[^^]+)\^c=(?<color>.*)/);
-            if (re && re.groups) {
-              return [re.groups.color, parseFloat(re.groups.location)]
-            }
-            return null
-          })
-          .filter(_ => _)
-          .sort((a, b) => a[1] - b[1]);
-        if (this.stops.length == 1) {
-          this.value = this.stops[0][0];
-          this.isGradient = false;
-          this.isValid = true;
-        } else if (this.stops.length) {
-          this.value = this.stops[0][0];
-          this.isGradient = true;
-          this.isValid = true;
-        }
-      }
+      this.stops = this.parseGradient(value);
+    }
+    if (this.isGradient()) {
+      this.value = this.stops[0][0];
     }
   }
-  toString(){
-    if (!this.isGradient) {
-      return this.value;
+
+  parseGradient(value: string): Array<[string, number]>{
+    const result = value.match(/(?<=Values=)([^|]+)/);
+    if (!result) {
+      return []
     }
-    const stops = this.stops.map(stop => `${stop[0].toString()} ${stop[1] * 100}%`).join(',');
-    return `linear-gradient(90deg, ${stops})`;
+    const stops: Stops = [];
+    result[0].split(';').forEach((stop) => {
+      const re = stop.match(/(?<=x=)(?<location>[^^]+)\^c=(?<color>.*)/);
+      if (re && re.groups) {
+        stops.push([re.groups.color, parseFloat(re.groups.location)]);
+      }
+    });
+    return stops.sort((a, b) => a[1] - b[1]);
+  }
+
+  isGradient() {
+    return this.stops && this.stops.length > 1
+  }
+
+  isValid() {
+    return chroma.valid(this.value)
+  }
+
+  toString(){
+    if (this.isGradient()) {
+      const stops = this.stops.map(stop => `${stop[0].toString()} ${stop[1] * 100}%`).join(',');
+      return `linear-gradient(90deg, ${stops})`;
+    }
+    return this.value;
   }
 }
 
