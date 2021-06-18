@@ -21,7 +21,9 @@ export class Color {
     } else {
       this.stops = this.parseGradient(value);
     }
-    if (this.isGradient()) {
+    if (this.stops.length === 0) {
+      this.stops.push([this.value, 0.5])
+    } else {
       this.value = this.stops[0][0];
     }
   }

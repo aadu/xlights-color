@@ -64,21 +64,21 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const store = useStore();
-    const col = computed(() => {
+    const color = computed(() => {
       return store.state.palettes.colors[props.color.id];
     });
-    const color = computed(() => {
-      const value = store.state.palettes.colors[props.color.id].value;
-      return chroma(value);
-    });
+
+    // const color = computed(() => {
+    //   const value = store.state.palettes.colors[props.color.id].value;
+    //   return chroma(value);
+    // });
+    const stops = ref(color.value.stops);
+    const hex = computed(() => chroma(color.value.value).hex());
     const op = ref(null);
-    const hex = computed(() => color.value.hex());
+
     const value = ref(hex.value);
     const gradient = ref(false);
-    const stops = ref(col.value.stops);
-    if (stops.value.length === 0) {
-      stops.value.push([col.value.value, 0.5]);
-    }
+
     // const value = computed({
     //   get() {
     //     return color.value.hex()
@@ -88,17 +88,27 @@ export default defineComponent({
     //   }
     // })
     const style = computed(() => ({
-      'background': col.value.stops.length > 1 ? col.value.toString() : color.value.hex(),
-      'color': color.value.luminance() > .5 ? 'black' : 'white',
+      'background': color.value.toString(),
+      'color': chroma(color.value.value).luminance() > .5 ? 'black' : 'white',
     }));
     const updateColor = debounce(function (value) {
       const color = new Color(value.hex);
       color.id = props.color.id;
       emit('update:color', color);
     }, 250);
-    watch(value, (color) => {
-      updateColor(color);
+    const updateStops = debounce(function (stops) {
+      const color = new Color('', stops);
+      color.id = props.color.id;
+      emit('update:color', color);
+    }, 250);
+    watch(value, (value) => {
+      updateColor(value);
+      stops.value = [[value.hex, 0.5]];
     });
+    watch(stops, (stops) => {
+      updateStops(stops)
+    })
+
     function toggle(event, isGradient = false) {
       gradient.value = isGradient;
       if (op.value) {
