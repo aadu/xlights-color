@@ -50,7 +50,7 @@ export default defineComponent({
         await readDirectory(currentWorkspace.value);
       });
 
-    const gradient = reactive({});
+    const gradient = reactive([]);
     watchEffect(() => {
       console.log('gradient changed', gradient)
     })

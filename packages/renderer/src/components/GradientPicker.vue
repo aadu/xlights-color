@@ -63,10 +63,10 @@
 </template>
 
 <script lang="ts">
-import { Sketch  } from '@ckpack/vue-color';
-import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount } from 'vue';
 import cloneDeep from 'lodash.clonedeep'
 import stringify from 'fast-json-stable-stringify'
+import { Sketch  } from '@ckpack/vue-color';
+import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount } from 'vue';
 
 const COLOR = 0;
 const POSITION = 1;
@@ -86,8 +86,8 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: Object,
-      default: () => {},
+      type: Array,
+      default: () => cloneDeep(defaultStops)
     },
   },
   emits: ['update:modelValue'],
@@ -95,12 +95,20 @@ export default defineComponent({
     const currentStopIdx = ref(0);
     const containerBoundingClientRectangle = ref({});
     const internalAngle = ref(0)
-    const stops: Stop[] = reactive(defaultStops.slice().map(stop => [...stop]));
     const stopsContainer = ref(null);
+    const stops: Stop[] = reactive(defaultStops.slice().map(stop => [...stop]));
+    // const stops = computed({
+    //   get() {
+    //     console.log('props',)
+    //     return props.modelValue.length >= 2 ? props.modelValue : _defaultStops
+    //   },
+    //   set(value) {
+    //     emit('update:modelValue', value)
+    //   }
+    // })
 
     watch(() => cloneDeep(stops), (current, previous) => {
       if (stringify(current) != stringify(previous)) {
-        console.log('stops', current)
         emit('update:modelValue', current)
       }
     }, {deep: true})
