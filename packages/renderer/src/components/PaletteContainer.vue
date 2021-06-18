@@ -1,6 +1,5 @@
 <template>
   <main id="palettes-wrapper">
-    <gradient-picker v-model="gradient" />
     <palette-card
       v-for="(palette, i) in palettes"
       :key="i"

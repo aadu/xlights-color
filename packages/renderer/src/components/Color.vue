@@ -24,7 +24,7 @@
     </template>
   </Card>
   <OverlayPanel ref="op" class="color-picker-container">
-    <GradientPicker style="box-shadow: none;" v-if="gradient" />
+    <GradientPicker style="box-shadow: none;" v-if="gradient" v-model="stops" />
     <ColPicker v-model="value" v-else style="box-shadow: none;"/>
   </OverlayPanel>
 </template>
@@ -64,6 +64,9 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const store = useStore();
+    const col = computed(() => {
+      return store.state.palettes.colors[props.color.id];
+    });
     const color = computed(() => {
       const value = store.state.palettes.colors[props.color.id].value;
       return chroma(value);
@@ -72,6 +75,10 @@ export default defineComponent({
     const hex = computed(() => color.value.hex());
     const value = ref(hex.value);
     const gradient = ref(false);
+    const stops = ref(col.value.stops);
+    if (stops.value.length === 0) {
+      stops.value.push([col.value.value, 0.5]);
+    }
     // const value = computed({
     //   get() {
     //     return color.value.hex()
@@ -81,7 +88,7 @@ export default defineComponent({
     //   }
     // })
     const style = computed(() => ({
-      'background-color': color.value.hex(),
+      'background': col.value.isGradient ? col.value.toString() : color.value.hex(),
       'color': color.value.luminance() > .5 ? 'black' : 'white',
     }));
     const updateColor = debounce(function (value) {
@@ -107,7 +114,7 @@ export default defineComponent({
       }
     })
 
-  return { style, hex, value, op, toggle, gradient };
+  return { style, hex, value, op, toggle, gradient, stops };
   },
 });
 </script>

@@ -9,11 +9,17 @@ export class Color {
   isValid: boolean;
   stops: Array<[string, number]>;
 
-  constructor(value: string) {
+  constructor(value: string, stops: Array<[string, number]> = []) {
     id++;
     this.id = id;
     this.isValid = false;
-    if (chroma.valid(value)) {
+    this.isGradient = false;
+    this.stops = stops;
+    if (stops.length) {
+      this.value = this.stops[0][0];
+      this.isGradient = true;
+      this.isValid = true;
+    } else if (chroma.valid(value)) {
       this.value = value;
       this.isGradient = false;
       this.isValid = true;
@@ -28,7 +34,8 @@ export class Color {
             }
             return null
           })
-          .filter(_ => _);
+          .filter(_ => _)
+          .sort((a, b) => a[1] - b[1]);
         if (this.stops.length == 1) {
           this.value = this.stops[0][0];
           this.isGradient = false;
@@ -41,7 +48,15 @@ export class Color {
       }
     }
   }
+  toString(){
+    if (!this.isGradient) {
+      return this.value;
+    }
+    const stops = this.stops.map(stop => `${stop[0].toString()} ${stop[1] * 100}%`).join(',');
+    return `linear-gradient(90deg, ${stops})`;
+  }
 }
+
 
 export function parsePalette(contents: string) {
   const colors = contents.trimEnd().split(/,/);

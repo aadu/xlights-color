@@ -66,7 +66,7 @@
 import cloneDeep from 'lodash.clonedeep'
 import stringify from 'fast-json-stable-stringify'
 import { Sketch  } from '@ckpack/vue-color';
-import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount } from 'vue';
+import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount, toRaw } from 'vue';
 
 const COLOR = 0;
 const POSITION = 1;
@@ -97,7 +97,8 @@ export default defineComponent({
     const internalAngle = ref(90)
     const stopsContainer = ref(null);
     console.log('props.modelValue', props.modelValue)
-    const stops: Stop[] = reactive(cloneDeep(defaultStops));
+    // const stops: Stop[] = reactive(cloneDeep(defaultStops));
+    const stops = reactive(toRaw(props.modelValue));
     // const stops = computed({
     //   get() {
     //     console.log('props',)
