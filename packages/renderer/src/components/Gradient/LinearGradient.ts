@@ -44,20 +44,20 @@ class LinearGradient extends Gradient {
     return `linear-gradient(${this.angle}deg, ${stops})`;
   }
 
-  toRaw(colorFormat = 'hex8') {
-    const stops = this.stops
-                    .slice()
-                    .sort((a, b) => a[POSITION] - b[POSITION])
-                    .map(stop => {
-                      stop[COLOR] = tinycolor(stop[COLOR]).toString(colorFormat);
-                      return stop;
-                    });
-    return {
-      type: this.type,
-      angle: this.angle,
-      stops,
-    };
-  }
+  // toRaw(colorFormat = 'hex8') {
+  //   const stops = this.stops
+  //                   .slice()
+  //                   .sort((a, b) => a[POSITION] - b[POSITION])
+  //                   .map(stop => {
+  //                     stop[COLOR] = tinycolor(stop[COLOR]).toString(colorFormat);
+  //                     return stop;
+  //                   });
+  //   return {
+  //     type: this.type,
+  //     angle: this.angle,
+  //     stops,
+  //   };
+  // }
 }
 
 export default LinearGradient;

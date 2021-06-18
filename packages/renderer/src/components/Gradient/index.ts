@@ -1,5 +1,5 @@
 import GradientPicker from './Picker.vue';
-import LinearGradient from './LinearGradient';
+import LinearGradient from './grad';
 
 export default GradientPicker;
 

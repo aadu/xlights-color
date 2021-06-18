@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed, reactive, watchEffect} from 'vue';
+import {defineComponent, computed, reactive, watchEffect, watch} from 'vue';
 import useStore from '/@/store';
 import { parsePalette, Color } from '/@/store/modules/palettes/color';
 import {useElectron} from '/@/use/electron';
@@ -26,7 +26,6 @@ export default defineComponent({
   setup () {
     const store = useStore();
     const electron = useElectron();
-    const gradient = reactive(new LinearGradient({angle: 180}));
 
     async function addPalette(filename: string, dirname: string) {
         const content = (await electron.readFile(`${dirname}/${filename}`, {encoding: 'utf-8'}));
@@ -51,10 +50,10 @@ export default defineComponent({
         await readDirectory(currentWorkspace.value);
       });
 
-      watchEffect(() => {
-        console.log('gradient changed', gradient);
-      });
-
+    const gradient = reactive(new LinearGradient());
+    watchEffect(() => {
+      console.log('gradient changed', gradient)
+    })
     return { palettes, currentWorkspace, gradient };
 
   },

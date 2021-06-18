@@ -14,7 +14,7 @@
       </div>
 
       <div
-        ref="picker"
+        ref="stopsContainer"
         class="vue-gpickr-stops-container"
       >
         <div class="vue-gpickr-stops-preview-container">
@@ -62,16 +62,24 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Sketch  } from '@ckpack/vue-color';
-import LinearGradient from './LinearGradient';
-import {computed, reactive, watchEffect, ref, toRefs, onBeforeUnmount } from 'vue';
+import LinearGradient from './grad';
+import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount } from 'vue';
 
 const COLOR = 0;
 const POSITION = 1;
 const REMOVE_TRESHOLD = 50;
 
-export default {
+type Stop = [string, number]
+
+const defaultStops: Stop[] = [
+  ['#0359b5', 0],
+  ['#f6ce01', 1],
+];
+
+
+export default defineComponent({
   components: {
     colorPicker: Sketch,
   },
@@ -81,19 +89,29 @@ export default {
       default: () => new LinearGradient(),
     },
   },
+  emits: ['update:modelValue'],
   setup(props, {emit}) {
     const currentStopIdx = ref(0);
     const containerBoundingClientRectangle = ref({});
+    const internalAngle = ref(0)
+    const stops: Stop[] = reactive(defaultStops.slice().map(stop => [...stop]));
+    const stopsContainer = ref(null);
 
-    function emitInput(angle, stops) {
-      emit('update:modelValue', new LinearGradient({ angle: angle.value, stops: stops.value }));
+
+    const emitInput = (angle, stops) => {
+      const newValue = new LinearGradient(stops, angle);
+      console.log('emitInput', newValue)
+      emit('update:modelValue', newValue);
+      // _angle.value = unref(angle);
     }
-    const stops = computed(() => {
-      return props.modelValue.stops.slice().map(stop => [...stop]);
-    });
+    // const stops = computed(() => {
+    //   console.log('computedStops')
+    //   return props.modelValue.stops.slice().map(stop => [...stop]);
+    // });
+
     const angle = computed({
       get() {
-        return props.modelValue.angle;
+        return internalAngle.value;
       },
       set(val) {
         let degrees = parseInt(val, 10) || 0;
@@ -103,64 +121,63 @@ export default {
         while (degrees > 360) {
           degrees = 360;
         }
-        emitInput(degrees, stops);
+        internalAngle.value = degrees;
       },
     });
 
     const orderedStops = computed(() => {
-      return stops.value.slice().sort((a, b) => a[POSITION] - b[POSITION]);
+      return stops.slice().sort((a, b) => a[POSITION] - b[POSITION]);
     });
 
 
-    function getGradientString(angle) {
+    function getGradientString(angle: number) {
       const stops = orderedStops.value.map(stop => `${stop[COLOR].toString()} ${stop[POSITION] * 100}%`).join(',');
+      console.log('getGradientStringstops', stops)
       return `linear-gradient(${angle}deg, ${stops})`;
     }
     const previewStyle = computed(() => {
-      return { background: getGradientString(angle) };
+      return { background: getGradientString(unref(angle)) };
     });
 
-    const picker = ref(null);
 
     const stopsPreviewStyle = computed(() => {
       return { background: getGradientString(90) };
     });
 
     const currentColor = computed({
-      get() {
-        return stops.value[currentStopIdx.value][COLOR];
+      get(): string {
+        return stops[currentStopIdx.value][COLOR];
       },
       set(val) {
-        stops.value[currentStopIdx.value][COLOR] = val.hex8;
-        emitInput(angle, stops);
+        stops[currentStopIdx.value][COLOR] = val.hex8;
       },
     });
 
-    function setCurrentStopIdx(index) {
+    function setCurrentStopIdx(index: number) {
       currentStopIdx.value = index;
     }
 
-    function stopStyle(index) {
-      const stop = stops.value[index];
+    function stopStyle(index: number) {
+      const stop = stops[index];
       return { left: `${stop[POSITION] * 100}%`, color: stop[COLOR].toString() };
     }
 
     function addStop(event) {
       const position = Math.round(event.offsetX * 100 / event.target.offsetWidth) / 100;
-      const index = stops.value.length;
-      stops.value.push([currentColor.value, position]);
+      const index = stops.length;
+      stops.push([unref(currentColor), position]);
       setCurrentStopIdx(index);
       emitInput(angle, stops);
     }
 
     function handleChange (event) {
-      if (!picker.value) {
+      if (!stopsContainer.value) {
         return;
       }
       event.preventDefault();
       event.stopPropagation();
 
-      if (stops.value.length > 2) { // Gradient must have at least 2 stops
+      if (stops.length > 2) { // Gradient must have at least 2 stops
         const y = (event.touches ? event.touches[0].clientY : event.clientY) || 0;
         const verticalDistance = Math.abs(y - containerBoundingClientRectangle.value.bottom);
 
@@ -184,8 +201,8 @@ export default {
         position = Math.round(left * 100 / containerWidth) / 100;
       }
 
-      const previousPosition = stops.value[currentStopIdx.value][POSITION];
-      stops.value[currentStopIdx.value][POSITION] = position;
+      const previousPosition = stops[currentStopIdx.value][POSITION];
+      stops[currentStopIdx.value][POSITION] = position;
       if (previousPosition != position) {
         emitInput(angle, stops);
       }
@@ -223,7 +240,7 @@ export default {
     }
 
     function removeCurrentStop() {
-      stops.value = stops.value.splice(currentStopIdx.value, 1);
+      stops = stops.splice(currentStopIdx.value, 1);
       if (currentStopIdx.value > 0) {
         setCurrentStopIdx(currentStopIdx.value - 1);
       }
@@ -232,7 +249,7 @@ export default {
     }
 
     function setContainerBoundingClientRectangle() {
-      containerBoundingClientRectangle.value = picker.value.getBoundingClientRect();
+      containerBoundingClientRectangle.value = stopsContainer.value.getBoundingClientRect();
       console.log('containerBoundingClientRectangle', containerBoundingClientRectangle);
     }
 
@@ -240,21 +257,29 @@ export default {
       unbindEventListeners();
     });
 
-    return {stops, angle, orderedStops, previewStyle, stopsPreviewStyle, currentColor, currentStopIdx, stopStyle, addStop, removeCurrentStop, setContainerBoundingClientRectangle, unbindEventListeners,
-      picker,
+    return {
+      addStop,
+      angle,
       containerBoundingClientRectangle,
+      currentColor,
+      currentStopIdx,
       handleChange,
-          handleTouchend,
-    handleTouchstart,
-    handleMouseDown,
-    handleMouseUp,
-
+      handleMouseDown,
+      handleMouseUp,
+      handleTouchend,
+      handleTouchstart,
+      orderedStops,
+      stopsContainer,
+      previewStyle,
+      removeCurrentStop,
+      setContainerBoundingClientRectangle,
+      stops,
+      stopsPreviewStyle,
+      stopStyle,
+      unbindEventListeners,
     };
-  },
-  mounted() {
-    console.log('modelValue', this.modelValue);
-  },
-};
+  }
+});
 </script>
 
 <style lang="scss" scoped>
