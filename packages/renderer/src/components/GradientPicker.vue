@@ -94,9 +94,10 @@ export default defineComponent({
   setup(props, {emit}) {
     const currentStopIdx = ref(0);
     const containerBoundingClientRectangle = ref({});
-    const internalAngle = ref(0)
+    const internalAngle = ref(90)
     const stopsContainer = ref(null);
-    const stops: Stop[] = reactive(defaultStops.slice().map(stop => [...stop]));
+    console.log('props.modelValue', props.modelValue)
+    const stops: Stop[] = reactive(cloneDeep(defaultStops));
     // const stops = computed({
     //   get() {
     //     console.log('props',)
@@ -135,6 +136,9 @@ export default defineComponent({
 
 
     function getGradientString(angle: number) {
+      if (orderedStops.value.length === 1) {
+        return orderedStops.value[0][COLOR].toString();
+      }
       const stops = orderedStops.value.map(stop => `${stop[COLOR].toString()} ${stop[POSITION] * 100}%`).join(',');
       return `linear-gradient(${angle}deg, ${stops})`;
     }
@@ -179,7 +183,7 @@ export default defineComponent({
       event.preventDefault();
       event.stopPropagation();
 
-      if (stops.length > 2) { // Gradient must have at least 2 stops
+      if (stops.length > 1) { // Gradient must have at least 2 stops
         const y = (event.touches ? event.touches[0].clientY : event.clientY) || 0;
         const verticalDistance = Math.abs(y - containerBoundingClientRectangle.value.bottom);
 

@@ -2,7 +2,8 @@
   <Card
     class="p-m-0 p-p-0 palette-color"
     :style="style"
-    @contextmenu="toggle"
+    @click="toggle"
+    @contextmenu="toggle($event, true)"
   >
     <template #content>
       {{ hex }}
@@ -22,15 +23,17 @@
       </svg>
     </template>
   </Card>
-  <OverlayPanel ref="op">
-    <ColPicker v-model="value" />
+  <OverlayPanel ref="op" class="color-picker-container">
+    <GradientPicker style="box-shadow: none;" v-if="gradient" />
+    <ColPicker v-model="value" v-else style="box-shadow: none;"/>
   </OverlayPanel>
 </template>
 
 <script lang="ts">
 import {defineComponent, ref, reactive, computed, watch} from 'vue';
 import ColorPicker from 'primevue/colorpicker';
-import { Sketch  } from '@ckpack/vue-color';
+import GradientPicker from './GradientPicker.vue';
+import { Sketch } from '@ckpack/vue-color';
 import OverlayPanel from 'primevue/overlaypanel';
 import Card from 'primevue/card';
 import chroma from 'chroma-js';
@@ -42,7 +45,7 @@ import useStore from '/@/store';
 
 export default defineComponent({
   name: 'Color',
-  components: { Card, ColorPicker, OverlayPanel, ColPicker: Sketch  },
+  components: { Card, ColorPicker, OverlayPanel, ColPicker: Sketch, GradientPicker  },
   props: {
     color: {
       type: Object,
@@ -53,6 +56,11 @@ export default defineComponent({
       required: false,
       default: 0,
     },
+    dragging: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
   },
   setup (props, { emit }) {
     const store = useStore();
@@ -63,6 +71,7 @@ export default defineComponent({
     const op = ref(null);
     const hex = computed(() => color.value.hex());
     const value = ref(hex.value);
+    const gradient = ref(false);
     // const value = computed({
     //   get() {
     //     return color.value.hex()
@@ -83,12 +92,22 @@ export default defineComponent({
     watch(value, (color) => {
       updateColor(color);
     });
-    function toggle(event) {
+    function toggle(event, isGradient = false) {
+      gradient.value = isGradient;
       if (op.value) {
         op.value.toggle(event);
       }
     }
-    return { style, hex, value, op, toggle };
+    const dragging = computed(() => (props.dragging));
+
+    watch(dragging, (current, prev) => {
+      console.log('DRAGGING')
+      if (current && !prev) {
+        op.value.hide();
+      }
+    })
+
+  return { style, hex, value, op, toggle, gradient };
   },
 });
 </script>

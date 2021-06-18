@@ -22,6 +22,7 @@
             <color-card
               :color="element"
               :index="index"
+              :dragging="drag"
               @update:color="updateColor($event, index)"
             />
           </div>
