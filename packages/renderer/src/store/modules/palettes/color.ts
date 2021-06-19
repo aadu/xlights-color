@@ -58,6 +58,14 @@ export class Color {
     }
     return this.value;
   }
+
+  toXPalette() {
+    if (this.isGradient()) {
+      const stops = this.stops.map(stop => `x=${stop[1].toFixed(3)}^c=${chroma(stop[0].toString()).hex('rgb')}`).join(';');
+      return `Active=TRUE|Values=${stops}|`;
+    }
+    return chroma(this.value).hex('rgb');
+  }
 }
 
 

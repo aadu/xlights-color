@@ -31,6 +31,9 @@
     </template>
     <template #footer>
       {{ palette.dirname }}/{{ palette.filename }}
+      <div>
+        {{ xPalette }}
+      </div>
     </template>
   </Card>
 </template>
@@ -85,7 +88,10 @@ export default defineComponent({
     function clone({ id, value, stops }: Color) {
       return new Color(value, stops);
     }
-    return { palette, name, drag, colors, start, pullFunction, updateColor, clone };
+    const xPalette = computed(() => {
+      return `${colors.value.map(c => c.toXPalette()).join(',')},`;
+    })
+    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette };
   },
 });
 </script>
