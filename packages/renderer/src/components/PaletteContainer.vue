@@ -6,12 +6,14 @@
       :palette="palette"
       :index="i"
     />
+    <p-btn icon="pi pi-plus-circle" class="p-ml-2 p-my-2" label="Add Palette" @click="addNewPalette"></p-btn>
   </main>
 </template>
 
 <script lang="ts">
 import {defineComponent, computed, reactive, watchEffect, watch} from 'vue';
 import useStore from '/@/store';
+import chroma from 'chroma-js';
 import { parsePalette, Color } from '/@/store/modules/palettes/color';
 import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
@@ -54,7 +56,17 @@ export default defineComponent({
     watchEffect(() => {
       console.log('gradient changed', gradient)
     })
-    return { palettes, currentWorkspace, gradient };
+
+    function addNewPalette() {
+      const palette = {
+        filename: `Palette${palettes.value.length}.xpalette`,
+        dirname: currentWorkspace.value,
+        colors: [...Array(8).keys()].map(() => (new Color(chroma.random().hex())))
+      };
+      store.dispatch(Palettes.add, palette);
+    }
+
+    return { palettes, currentWorkspace, gradient, addNewPalette };
 
   },
 });

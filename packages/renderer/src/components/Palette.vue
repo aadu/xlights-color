@@ -36,7 +36,7 @@
         </template>
       </draggable>
     </template>
-    <template #footer>
+    <template #footer2>
       {{ palette.dirname }}/{{ palette.filename }}
       <div>
         {{ xPalette }}
