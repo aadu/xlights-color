@@ -1,7 +1,14 @@
 <template>
   <Card class="p-mb-2 p-py-0 p-mx-2">
     <template #title>
-      {{ name }}
+      <Inplace :closable="true" v-model:active="active">
+        <template #display>
+            <span class="p-card-title">{{ name }}</span>
+        </template>
+        <template #content>
+            <InputText v-model="title" autoFocus @keyup.enter="active=false;" />
+        </template>
+    </Inplace>
     </template>
     <template #content>
       <draggable
@@ -39,29 +46,43 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed, reactive, ref, watchEffect} from 'vue';
+import {defineComponent, computed, reactive, ref, unref, watchEffect} from 'vue';
+import Card from 'primevue/card';
+import Inplace from 'primevue/inplace';
+import InputText from 'primevue/inputtext';
+import draggable from 'vuedraggable';
 import {Palette, Color} from '/@/store/modules/palettes/index';
 import ColorCard from './Color.vue';
-import Card from 'primevue/card';
-import draggable from 'vuedraggable';
 import useStore from '/@/store';
 import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
 // see https://github.com/SortableJS/vue.draggable.next/blob/master/example/components/clone-on-control.vue
 
 export default defineComponent({
   name: 'Palette',
-  components: { Card, ColorCard, draggable },
+  components: { Card, ColorCard, draggable, Inplace, InputText },
   props: {
     palette: {
       type: Object,
       required: true,
     },
+    index: {
+      type: Number,
+      required: true,
+    }
   },
-  setup ({ palette }) {
+  setup ({ palette, index }) {
     const store = useStore();
     const name = computed(() => palette.filename.split('.')[0]);
     const drag = ref(false);
     const controlOnStart = ref(true);
+    const title = computed({
+      get() {
+        return palette.filename.split('.')[0];
+      },
+      set(name: string) {
+        store.dispatch(Palettes.updateName, {name: `${name}.xpalette`, index});
+      }
+    });
 
     interface StartEvent {
       originalEvent: DragEvent
@@ -91,7 +112,8 @@ export default defineComponent({
     const xPalette = computed(() => {
       return `${colors.value.map(c => c.toXPalette()).join(',')},`;
     })
-    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette };
+    const active = ref(false);
+    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette, title, active };
   },
 });
 </script>

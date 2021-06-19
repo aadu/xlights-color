@@ -1,5 +1,5 @@
 import type { ActionContext, ActionTree } from 'vuex';
-import type { Mutations, ColorMutation, AddColor, RemoveColor, SetColors, UpdateColor } from './mutations';
+import type { Mutations, ColorMutation, AddColor, RemoveColor, SetColors, UpdateColor, UpdateName } from './mutations';
 import { MutationTypes } from './mutations';
 import type { State, Palette } from './index';
 import type { RootState } from '/@/store';
@@ -13,7 +13,8 @@ export enum ActionTypes {
   setColors = 'PALETTES__SET_COLOR',
   removeColor = 'PALETTES__REMOVE_COLOR',
   clearColors = 'PALETTES__CLEAR_COLORS',
-  updateColor = 'PALETTES__UPDATE_COLOR'
+  updateColor = 'PALETTES__UPDATE_COLOR',
+  updateName = 'PALETTES__UPDATE_NAME'
 }
 
 // !!! AUGUMENTED ACTION CONTEXT !!!
@@ -60,6 +61,10 @@ export interface Actions {
     { commit }: AugmentedActionContext,
     payload: ColorMutation
   ): void;
+  [ActionTypes.updateName](
+    { commit }: AugmentedActionContext,
+    payload: UpdateName
+  ): void;
 }
 
 export const actions: ActionTree<State, RootState> & Actions = {
@@ -89,5 +94,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   [ActionTypes.clearColors]({ commit }, payload) {
     commit(MutationTypes.CLEAR_COLORS, payload);
+  },
+  [ActionTypes.updateName]({ commit }, payload) {
+    commit(MutationTypes.UPDATE_NAME, payload);
   },
 };

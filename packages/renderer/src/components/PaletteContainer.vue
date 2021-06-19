@@ -4,6 +4,7 @@
       v-for="(palette, i) in palettes"
       :key="i"
       :palette="palette"
+      :index="i"
     />
   </main>
 </template>
