@@ -202,7 +202,7 @@ export default defineComponent({
 <style>
 .palette-container {
   padding-inline-start: 0px;
-  margin-bottom: -12px;
+  margin-bottom: -22px;
 }
 .flip-list-move {
   transition: transform 0.5s;
