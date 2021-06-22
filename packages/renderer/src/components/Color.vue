@@ -6,7 +6,7 @@
     @click.ctrl="toggle($event, true)"
   >
     <template #content>
-      {{ hex }}
+      <span v-if="!isGradient" v-text="name" class="color-name" />
       <svg
         v-if="index >= 8"
         class="overlay"
@@ -74,6 +74,7 @@ export default defineComponent({
     // });
     const stops = ref(color.value.stops);
     const hex = computed(() => chroma(color.value.value).hex());
+    const name = computed(() => chroma(color.value.value).name());
     const op = ref(null);
 
     const value = ref(hex.value);
@@ -130,7 +131,11 @@ export default defineComponent({
       }
     })
 
-  return { style, hex, value, op, toggle, gradient, stops };
+    const isGradient = computed(() => {
+      return stops.value.length > 1;
+    })
+
+  return { style, hex, value, op, toggle, gradient, stops, isGradient, name};
   },
 });
 </script>
@@ -138,6 +143,7 @@ export default defineComponent({
 .palette-color {
   position: relative;
   width: 150px;
+  height: 100%;
 }
 .overlay {
   position: absolute;
@@ -147,5 +153,10 @@ export default defineComponent({
   right: 0;
   transition: .5s ease;
   color: white;
+}
+.color-name {
+  text-align: center;
+  display: block;
+  width: 100%;
 }
 </style>

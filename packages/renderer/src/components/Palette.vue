@@ -1,5 +1,5 @@
 <template>
-  <Card class="p-mb-2 p-py-0 p-mx-2">
+  <Card class="p-mb-2 p-py-0 p-mx-2 palette">
     <template #title>
       <div class="p-d-flex p-ai-center">
         <Inplace :closable="true" v-model:active="active">
@@ -204,6 +204,7 @@ export default defineComponent({
 .palette-container {
   padding-inline-start: 0px;
   margin: 0xp;
+  width: 100%;
   /* margin-bottom: -22px; */
 }
 .flip-list-move {
@@ -215,5 +216,8 @@ export default defineComponent({
 .ghost {
   opacity: 0.5;
   background: #c8ebfb;
+}
+.palette {
+  width: 100%;
 }
 </style>

@@ -28,4 +28,7 @@ export default defineComponent({
   margin-right: 10px;
   min-width: 200px;
 }
+.card-content {
+  width: 100%;
+}
 </style>
