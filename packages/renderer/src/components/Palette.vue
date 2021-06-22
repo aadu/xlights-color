@@ -11,13 +11,13 @@
           </template>
       </Inplace>
       <p-btn type="button" @click="toggleMenu" icon="pi pi-ellipsis-h" class="p-ml-3 p-button-secondary p-button-text p-button-only" />
-      <Menu ref="menu" :model="panelOptions" :popup="true"></Menu>
+      <Menu ref="menu" class="p-ml-auto" :model="panelOptions" :popup="true"></Menu>
     </div>
     </template>
     <template #content>
       <draggable
         v-model="colors"
-        class="p-grid palette-container p-d-flex"
+        class="p-grid palette-container p-d-flex p-m-0 p-p-0"
         tag="transition-group"
         :clone="clone"
         :group="{ name: 'palette', pull: pullFunction }"
@@ -51,7 +51,8 @@
 
 <script lang="ts">
 import {defineComponent, computed, reactive, ref, unref, watchEffect} from 'vue';
-import Card from 'primevue/card';
+// import Card from 'primevue/card';
+import Card from './Card.vue';
 import Inplace from 'primevue/inplace';
 import InputText from 'primevue/inputtext';
 import draggable from 'vuedraggable';
@@ -202,7 +203,8 @@ export default defineComponent({
 <style>
 .palette-container {
   padding-inline-start: 0px;
-  margin-bottom: -22px;
+  margin: 0xp;
+  /* margin-bottom: -22px; */
 }
 .flip-list-move {
   transition: transform 0.5s;

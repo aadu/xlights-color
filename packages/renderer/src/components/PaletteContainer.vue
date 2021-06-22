@@ -1,12 +1,20 @@
 <template>
   <main id="palettes-wrapper">
-    <palette-card
-      v-for="(palette, i) in palettes"
-      :key="i"
-      :palette="palette"
-      :index="i"
-    />
-    <p-btn icon="pi pi-plus-circle" class="p-ml-2 p-my-2" label="Add Palette" @click="addNewPalette"></p-btn>
+    <DataView :value="palettes" layout="list">
+      <template #header>
+          Palettes
+      </template>
+      <template #list="slotProps">
+        <palette-card
+          :key="slotProps.index"
+          :palette="slotProps.data"
+          :index="slotProps.index"
+        />
+      </template>
+      <template #footer>
+        <p-btn icon="pi pi-plus-circle" class="p-ml-2 p-my-2" label="Add Palette" @click="addNewPalette"></p-btn>
+      </template>
+    </DataView>
   </main>
 </template>
 
@@ -14,6 +22,7 @@
 import {defineComponent, computed, reactive, watchEffect, watch} from 'vue';
 import useStore from '/@/store';
 import chroma from 'chroma-js';
+import DataView from 'primevue/dataview';
 import { parsePalette, Color } from '/@/store/modules/palettes/color';
 import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
@@ -24,7 +33,7 @@ import GradientPicker from './GradientPicker.vue';
 
 export default defineComponent({
   name: 'Palettes',
-  components: { PaletteCard, GradientPicker },
+  components: { PaletteCard, GradientPicker, DataView },
   setup () {
     const store = useStore();
     const electron = useElectron();
@@ -53,9 +62,6 @@ export default defineComponent({
       });
 
     const gradient = reactive([]);
-    watchEffect(() => {
-      console.log('gradient changed', gradient)
-    })
 
     function addNewPalette() {
       const palette = {

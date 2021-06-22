@@ -96,19 +96,7 @@ export default defineComponent({
     const containerBoundingClientRectangle = ref({});
     const internalAngle = ref(90)
     const stopsContainer = ref(null);
-    console.log('props.modelValue', props.modelValue)
-    // const stops: Stop[] = reactive(cloneDeep(defaultStops));
     const stops = reactive(toRaw(props.modelValue));
-    // const stops = computed({
-    //   get() {
-    //     console.log('props',)
-    //     return props.modelValue.length >= 2 ? props.modelValue : _defaultStops
-    //   },
-    //   set(value) {
-    //     emit('update:modelValue', value)
-    //   }
-    // })
-
     watch(() => cloneDeep(stops), (current, previous) => {
       if (stringify(current) != stringify(previous)) {
         emit('update:modelValue', current)

@@ -6,7 +6,7 @@
     <top-bar />
     <div
       id="content"
-      class="p-m-2 p-p-2"
+      class="p-m-0 p-p-0"
     >
       <router-view />
     </div>

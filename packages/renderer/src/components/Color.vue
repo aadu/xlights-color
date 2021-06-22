@@ -2,8 +2,8 @@
   <Card
     class="p-m-0 p-p-0 palette-color"
     :style="style"
-    @click="toggle"
-    @contextmenu="toggle($event, true)"
+    @click.exact="toggle"
+    @click.ctrl="toggle($event, true)"
   >
     <template #content>
       {{ hex }}
@@ -110,9 +110,16 @@ export default defineComponent({
     })
 
     function toggle(event, isGradient = false) {
+      // if same, just toggle,
+      // if different, show
+      const show = gradient.value !== isGradient;
       gradient.value = isGradient;
       if (op.value) {
-        op.value.toggle(event);
+        if (show) {
+          op.value.show(event);
+        } else {
+          op.value.toggle(event);
+        }
       }
     }
     const dragging = computed(() => (props.dragging));
