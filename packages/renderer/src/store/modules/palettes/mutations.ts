@@ -72,7 +72,6 @@ export const mutations: MutationTree<State> & Mutations = {
     state.list = state.list.filter(({ filename }) => filename !== payload);
   },
   [MutationTypes.UPDATE_NAME](state, payload) {
-    console.log('payload', payload)
     state.list[payload.index].filename = payload.name;
   },
   [MutationTypes.CLEAR](state) {

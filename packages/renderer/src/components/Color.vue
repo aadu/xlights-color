@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, reactive, computed, watch} from 'vue';
+import {defineComponent, ref, unref, toRaw, computed, watch} from 'vue';
 import ColorPicker from 'primevue/colorpicker';
 import GradientPicker from './GradientPicker.vue';
 import { Sketch } from '@ckpack/vue-color';
@@ -67,62 +67,45 @@ export default defineComponent({
     const color = computed(() => {
       return store.state.palettes.colors[props.color.id];
     });
-
-    // const color = computed(() => {
-    //   const value = store.state.palettes.colors[props.color.id].value;
-    //   return chroma(value);
-    // });
-    const stops = ref(color.value.stops);
+    const stops = ref(color.value.stops.map(stop => [...stop]));
     const hex = computed(() => chroma(color.value.value).hex());
-    const name = computed(() => chroma(color.value.value).name());
+    const name = computed(() => chroma(hex.value).name());
     const op = ref(null);
 
     const value = ref(hex.value);
     const gradient = ref(false);
+    const style = computed(() => {
+      return {
+        'background': color.value.toString(),
+        'color': chroma(color.value.value).luminance() > .5 ? 'black' : 'white',
+      }
+    });
 
-    // const value = computed({
-    //   get() {
-    //     return color.value.hex()
-    //   },
-    //   set(value: string) {
-    //     emit('update:color', new Color(value))
-    //   }
-    // })
-    const style = computed(() => ({
-      'background': color.value.toString(),
-      'color': chroma(color.value.value).luminance() > .5 ? 'black' : 'white',
-    }));
     const updateColor = debounce(function (value) {
-      const color = new Color(value.hex);
+      const color = new Color(value.hex, [[value.hex, 0.5]]);
       color.id = props.color.id;
       emit('update:color', color);
     }, 250);
     const updateStops = debounce(function (stops) {
-      const color = new Color('', stops);
+      const color = new Color(stops[0][0], stops);
       color.id = props.color.id;
       emit('update:color', color);
     }, 250);
+
+    const ignoreStops = ref(false);
+
     watch(value, (value) => {
-      updateColor(value);
+      ignoreStops.value = true;
       stops.value = [[value.hex, 0.5]];
+      ignoreStops.value = false;
+      updateColor(value);
     });
     watch(stops, (stops) => {
-      updateStops(stops)
-    })
-
-    function toggle(event, isGradient = false) {
-      // if same, just toggle,
-      // if different, show
-      const show = gradient.value !== isGradient;
-      gradient.value = isGradient;
-      if (op.value) {
-        if (show) {
-          op.value.show(event);
-        } else {
-          op.value.toggle(event);
-        }
+      if (!ignoreStops.value) {
+        updateStops(stops);
       }
-    }
+    });
+
     const dragging = computed(() => (props.dragging));
 
     watch(dragging, (current, prev) => {
@@ -135,6 +118,19 @@ export default defineComponent({
       return stops.value.length > 1;
     })
 
+    gradient.value = isGradient.value;
+
+    function toggle(event, ctrlClick = false) {
+      // toggle if not control click
+      if (ctrlClick) {
+        gradient.value = !isGradient.value;
+        if (op.value) {
+          op.value.show(event);
+        }
+      } else if (op.value) {
+        op.value.toggle(event);
+      }
+    };
   return { style, hex, value, op, toggle, gradient, stops, isGradient, name};
   },
 });

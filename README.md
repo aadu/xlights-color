@@ -2,14 +2,20 @@
 ## Roadmap
 - [ ] Add new colors
 - [ ] Delete colors
-- [ ] Clone Palette
-- [ ] Add Palette
-- [ ] Delete Palette
-- [ ] Edit Palette Name
-- [ ] Gradient Palettes
+- [x] Clone Palette
+- [x] Add Palette
+- [x] Delete Palette
+- [x] Edit Palette Name
+- [x] Gradient Palettes
 - [ ] Write Palettes
-- [ ] Download Palettes (zipped)
-- [ ] Random Palette Permutation
-- [ ] Color Names via Chroma.js
-- [ ] Reverse Color Order
+- [x] Download Palettes (zipped)
+- [x] Random Palette Permutation
+- [x] Color Names via Chroma.js
+- [x] Reverse Color Order
 - [ ] Sort Palettes
+- [ ] Filter Palettes
+- [ ] Create Palette Backup
+- [ ] Randomize color
+- [ ] Darken/Lighten color
+- [ ] Mix/blend colors
+- [ ] Interprolate Colors

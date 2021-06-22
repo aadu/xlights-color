@@ -34,9 +34,15 @@
               :color="element"
               :index="index"
               :dragging="drag"
+              :key="element.id"
               @update:color="updateColor($event, index)"
             />
           </div>
+        </template>
+          <template #footer>
+            <div class="p-d-flex p-ai-center" key="palette-footer">
+              <p-btn icon="pi pi-plus" class="p-ml-3 p-button-outlined p-button-secondary p-button-icon-only p-button-rounded" @click="addColor"/>
+            </div>
         </template>
       </draggable>
     </template>
@@ -52,6 +58,7 @@
 <script lang="ts">
 import {defineComponent, computed, reactive, ref, unref, watchEffect} from 'vue';
 // import Card from 'primevue/card';
+import chroma from 'chroma-js';
 import Card from './Card.vue';
 import Inplace from 'primevue/inplace';
 import InputText from 'primevue/inputtext';
@@ -85,7 +92,7 @@ export default defineComponent({
       required: true,
     }
   },
-  setup ({ palette, index }) {
+  setup ({ palette, index}) {
     const store = useStore();
     const name = computed(() => palette.filename.split('.')[0]);
     const drag = ref(false);
@@ -114,16 +121,30 @@ export default defineComponent({
     }
 
     const colors = computed({
-      get(){ return palette.colors;},
+      get(){
+         return palette.colors.map(c => store.state.palettes.colors[c.id]);
+        },
       set(value: Array<Color>){
         store.dispatch(Palettes.setColors, {palette: palette.filename, colors: value});
       },
     });
+    function updateColors(colors: Color[]){
+      const values = colors.map(c => store.state.palettes.colors[c.id]);
+      store.dispatch(Palettes.setColors, {palette: palette.filename, colors: values});
+    };
+
     function updateColor(color: Color, index: number) {
-      store.dispatch(Palettes.updateColor, {palette: palette.filename, color, index });
+      store.dispatch(Palettes.updateColor, {palette: palette.filename, color});
     }
-    function clone({ id, value, stops }: Color) {
-      return new Color(value, stops);
+
+    function addColor() {
+      const color = new Color(chroma.random().hex());
+      store.dispatch(Palettes.addColor, {palette: palette.filename, color });
+    }
+
+    function clone({ id }: Color) {
+      const color = store.state.palettes.colors[id];
+      return new Color(color.value, color.stops);
     }
     const xPalette = computed(() => {
       return `${colors.value.map(c => c.toXPalette()).join(',')},`;
@@ -142,16 +163,15 @@ export default defineComponent({
             label: 'Random Order',
             icon: 'pi pi-refresh',
             command: () => {
-              shuffleArray(palette.colors)
-              store.dispatch(Palettes.setColors, {palette: palette.filename, colors: palette.colors});
+              shuffleArray(palette.colors);
+              updateColors(palette.colors);
             }
         },
         {
             label: 'Reverse Order',
             icon: 'pi pi-sort-alpha-up-alt',
             command: () => {
-              store.dispatch(Palettes.setColors, {palette: palette.filename, colors: palette.colors.reverse()});
-
+              updateColors(palette.colors.reverse());
             }
         },
               {
@@ -196,7 +216,7 @@ export default defineComponent({
       }
     }
 
-    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette, title, active, panelOptions, menu, toggleMenu };
+    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette, title, active, panelOptions, menu, toggleMenu, addColor };
   },
 });
 </script>

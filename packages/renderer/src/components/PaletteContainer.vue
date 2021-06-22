@@ -6,7 +6,7 @@
       </template>
       <template #list="slotProps">
         <palette-card
-          :key="slotProps.index"
+          :key="slotProps.data.filename"
           :palette="slotProps.data"
           :index="slotProps.index"
         />
