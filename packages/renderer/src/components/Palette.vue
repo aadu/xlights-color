@@ -35,6 +35,7 @@
               :index="index"
               :dragging="drag"
               :key="element.id"
+              @delete="removeColor"
               @update:color="updateColor($event, index)"
             />
           </div>
@@ -63,7 +64,7 @@ import Card from './Card.vue';
 import Inplace from 'primevue/inplace';
 import InputText from 'primevue/inputtext';
 import draggable from 'vuedraggable';
-import {Palette, Color} from '/@/store/modules/palettes/index';
+import {Color} from '/@/store/modules/palettes/index';
 import Menu from 'primevue/menu';
 import ColorCard from './Color.vue';
 import useStore from '/@/store';
@@ -142,6 +143,10 @@ export default defineComponent({
       store.dispatch(Palettes.addColor, {palette: palette.filename, color });
     }
 
+    function removeColor(event) {
+      store.dispatch(Palettes.removeColor, {palette: palette.filename, index: event });
+    }
+
     function clone({ id }: Color) {
       const color = store.state.palettes.colors[id];
       return new Color(color.value, color.stops);
@@ -216,7 +221,7 @@ export default defineComponent({
       }
     }
 
-    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette, title, active, panelOptions, menu, toggleMenu, addColor };
+    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette, title, active, panelOptions, menu, toggleMenu, addColor, removeColor };
   },
 });
 </script>

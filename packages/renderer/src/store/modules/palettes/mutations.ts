@@ -97,7 +97,7 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.REMOVE_COLOR](state, payload) {
     const index = state.list.findIndex(_ => _.filename === payload.palette);
-    state.list[index].colors = state.list[index].colors.splice(payload.index, 1);
+    state.list[index].colors.splice(payload.index, 1);
   },
   [MutationTypes.CLEAR_COLORS](state, payload) {
     const index = state.list.findIndex(_ => _.filename === payload.palette);

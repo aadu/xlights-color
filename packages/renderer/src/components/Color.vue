@@ -4,6 +4,7 @@
     :style="style"
     @click.exact="toggle"
     @click.ctrl="toggle($event, true)"
+    @contextmenu="onContextMenu"
   >
     <template #content>
       <span v-if="!isGradient" v-text="name" class="color-name" />
@@ -23,15 +24,16 @@
       </svg>
     </template>
   </Card>
+  <ContextMenu ref="cm" :model="contextItems" />
   <OverlayPanel ref="op" class="color-picker-container">
     <GradientPicker style="box-shadow: none;" v-if="gradient" v-model="stops" />
-    <ColPicker v-model="value" v-else style="box-shadow: none;"/>
+    <ColorPicker v-model="value" v-else style="box-shadow: none;"/>
   </OverlayPanel>
 </template>
 
 <script lang="ts">
 import {defineComponent, ref, unref, toRaw, computed, watch} from 'vue';
-import ColorPicker from 'primevue/colorpicker';
+import ContextMenu from 'primevue/contextmenu';
 import GradientPicker from './GradientPicker.vue';
 import { Sketch } from '@ckpack/vue-color';
 import OverlayPanel from 'primevue/overlaypanel';
@@ -45,7 +47,7 @@ import useStore from '/@/store';
 
 export default defineComponent({
   name: 'Color',
-  components: { Card, ColorPicker, OverlayPanel, ColPicker: Sketch, GradientPicker  },
+  components: { Card, OverlayPanel, ColorPicker: Sketch, GradientPicker, ContextMenu },
   props: {
     color: {
       type: Object,
@@ -131,7 +133,58 @@ export default defineComponent({
         op.value.toggle(event);
       }
     };
-  return { style, hex, value, op, toggle, gradient, stops, isGradient, name};
+    const cm = ref(null);
+    const contextItems = ref([
+            {
+               label:'File',
+               icon:'pi pi-fw pi-file',
+               items:[
+                    {
+                        label:'New',
+                        icon:'pi pi-fw pi-plus',
+                        items:[
+                           {
+                              label:'Bookmark',
+                              icon:'pi pi-fw pi-bookmark'
+                           },
+                           {
+                              label:'Video',
+                              icon:'pi pi-fw pi-video'
+                           },
+                        ]
+                    },
+                    {
+                        label:'Delete',
+                        icon:'pi pi-fw pi-trash'
+                    },
+                    {
+                       separator:true
+                    },
+                    {
+                       label:'Export',
+                       icon:'pi pi-fw pi-external-link'
+                    }
+                ]
+            },
+            {
+               separator:true
+            },
+            {
+               label:'Delete',
+               icon:'pi pi-fw pi-trash',
+                command: () => {
+                  emit('delete', props.index)
+                }
+
+            }
+        ]);
+
+    function onContextMenu(event){
+      if (cm.value) {
+        cm.value.show(event);
+      }
+    }
+  return { style, hex, value, op, toggle, gradient, stops, isGradient, name, contextItems, onContextMenu, cm};
   },
 });
 </script>
