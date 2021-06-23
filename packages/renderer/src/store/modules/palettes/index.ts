@@ -11,22 +11,21 @@ import type {
   DispatchOptions,
 } from 'vuex';
 import type { RootState } from '/@/store';
+import type { Palette } from './palette';
 import type { Color } from './color';
 export { Color } from './color';
+export { Palette } from './palette';
 
-export interface Palette {
-  filename?: string;
-  directory?: string;
-  colors: Array<Color>;
-}
 
 export interface State {
-  list: Array<Palette>;
+  order: Array<number>;
+  palettes: Record<number, Palette>;
   colors: Record<number, Color>;
 }
 
 const state: State = {
-  list: [],
+  order: [],
+  palettes: {},
   colors: {},
 };
 

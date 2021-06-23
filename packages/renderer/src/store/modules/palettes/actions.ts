@@ -1,7 +1,7 @@
 import type { ActionContext, ActionTree } from 'vuex';
-import type { Mutations, ColorMutation, AddColor, RemoveColor, SetColors, UpdateColor, UpdateName } from './mutations';
+import type { Mutations, PaletteMutations } from './mutations';
 import { MutationTypes } from './mutations';
-import type { State, Palette } from './index';
+import type { State, Palette, Color } from './index';
 import type { RootState } from '/@/store';
 
 export enum ActionTypes {
@@ -9,6 +9,7 @@ export enum ActionTypes {
   set = 'PALETTES__SET',
   remove = 'PALETTES__REMOVE',
   clear = 'PALETTES__CLEAR',
+  extendColors = 'PALETTES__EXTEND_COLORS',
   addColor = 'PALETTES__ADD_COLOR',
   setColors = 'PALETTES__SET_COLOR',
   removeColor = 'PALETTES__REMOVE_COLOR',
@@ -28,7 +29,7 @@ type AugmentedActionContext = {
 export interface Actions {
   [ActionTypes.set](
     { commit }: AugmentedActionContext,
-    payload: Array<Palette>
+    payload: Array<number>
   ): void;
   [ActionTypes.add](
     { commit }: AugmentedActionContext,
@@ -36,34 +37,38 @@ export interface Actions {
   ): void;
   [ActionTypes.remove](
     { commit }: AugmentedActionContext,
-    payload: string
+    payload: number
   ): void;
   [ActionTypes.clear](
     { commit }: AugmentedActionContext
   ): void;
   [ActionTypes.setColors](
     { commit }: AugmentedActionContext,
-    payload: SetColors
+    payload: PaletteMutations.SetColors
+  ): void;
+  [ActionTypes.extendColors](
+    { commit }: AugmentedActionContext,
+    payload: Array<Color>
   ): void;
   [ActionTypes.addColor](
     { commit }: AugmentedActionContext,
-    payload: AddColor
+    payload: PaletteMutations.AddColor
   ): void;
   [ActionTypes.removeColor](
     { commit }: AugmentedActionContext,
-    payload: RemoveColor
+    payload: PaletteMutations.RemoveColor
   ): void;
   [ActionTypes.updateColor](
     { commit }: AugmentedActionContext,
-    payload: UpdateColor
+    payload: PaletteMutations.UpdateColor
   ): void;
   [ActionTypes.clearColors](
     { commit }: AugmentedActionContext,
-    payload: ColorMutation
+    payload: PaletteMutations.ColorMutation
   ): void;
   [ActionTypes.updateName](
     { commit }: AugmentedActionContext,
-    payload: UpdateName
+    payload: PaletteMutations.UpdateName
   ): void;
 }
 
@@ -79,6 +84,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   [ActionTypes.clear]({ commit }) {
     commit(MutationTypes.CLEAR, undefined);
+  },
+  [ActionTypes.extendColors]({ commit }, payload) {
+    commit(MutationTypes.EXTEND_COLORS, payload);
   },
   [ActionTypes.setColors]({ commit }, payload) {
     commit(MutationTypes.SET_COLORS, payload);

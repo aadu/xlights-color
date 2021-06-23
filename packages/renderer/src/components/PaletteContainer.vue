@@ -6,8 +6,8 @@
       </template>
       <template #list="slotProps">
         <palette-card
-          :key="slotProps.data.filename"
-          :palette="slotProps.data"
+          :key="slotProps.data.id"
+          :paletteId="slotProps.data.id"
           :index="slotProps.index"
         />
       </template>
@@ -23,10 +23,10 @@ import {defineComponent, computed, reactive, watchEffect, watch} from 'vue';
 import useStore from '/@/store';
 import chroma from 'chroma-js';
 import DataView from 'primevue/dataview';
-import { parsePalette, Color } from '/@/store/modules/palettes/color';
+import { parsePalette } from '/@/store/modules/palettes/palette';
 import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
-import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
+import { ActionTypes as Palettes, Color, Palette } from '/@/store/modules/palettes/index';
 import GradientPicker from './GradientPicker.vue';
 
 
@@ -41,9 +41,9 @@ export default defineComponent({
     async function addPalette(filename: string, dirname: string) {
         const content = (await electron.readFile(`${dirname}/${filename}`, {encoding: 'utf-8'}));
         const colors = parsePalette(content);
-        const palette = {filename, dirname, colors};
-        store.dispatch(Palettes.add, palette);
-
+        const palette = new Palette(filename, dirname, colors.map(c => c.id));
+        await store.dispatch(Palettes.extendColors, colors);
+        await store.dispatch(Palettes.add, palette);
     }
 
     async function readDirectory(path: string | undefined) {
@@ -55,24 +55,24 @@ export default defineComponent({
     }
 
     const currentWorkspace = computed(() => (store.state.workspaces.current));
-    const palettes = computed(() => (store.state.palettes.list));
+    const palettes = computed(() => (store.getters.palettes));
 
     watchEffect(async () => {
         await readDirectory(currentWorkspace.value);
       });
 
-    const gradient = reactive([]);
-
-    function addNewPalette() {
-      const palette = {
-        filename: `Palette${palettes.value.length}.xpalette`,
-        dirname: currentWorkspace.value,
-        colors: [...Array(8).keys()].map(() => (new Color(chroma.random().hex())))
-      };
-      store.dispatch(Palettes.add, palette);
+    async function addNewPalette() {
+      const colors = [...Array(8).keys()].map(() => (new Color(chroma.random().hex())))
+      const palette = new Palette(
+        `Palette${palettes.value.length}.xpalette`,
+        currentWorkspace.value,
+        colors.map(c => c.id)
+      );
+      await store.dispatch(Palettes.extendColors, colors);
+      await store.dispatch(Palettes.add, palette);
     }
 
-    return { palettes, currentWorkspace, gradient, addNewPalette };
+    return { palettes, currentWorkspace, addNewPalette };
 
   },
 });

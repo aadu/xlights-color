@@ -42,6 +42,7 @@ import chroma from 'chroma-js';
 import { Color } from '/@/store/modules/palettes/color';
 import debounce from 'lodash.debounce';
 import useStore from '/@/store';
+import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
 
 
 
@@ -49,8 +50,12 @@ export default defineComponent({
   name: 'Color',
   components: { Card, OverlayPanel, ColorPicker: Sketch, GradientPicker, ContextMenu },
   props: {
-    color: {
-      type: Object,
+    paletteId: {
+      type: Number,
+      required: true,
+    },
+    id: {
+      type: Number,
       required: true,
     },
     index: {
@@ -64,37 +69,42 @@ export default defineComponent({
       default: false
     }
   },
-  setup (props, { emit }) {
+  setup ({ paletteId, id, index, dragging: isDragging}, { emit }) {
+    const dragging = ref(isDragging);
     const store = useStore();
     const color = computed(() => {
-      return store.state.palettes.colors[props.color.id];
+      return store.state.palettes.colors[id];
     });
     const stops = ref(color.value.stops.map(stop => [...stop]));
     const hex = computed(() => chroma(color.value.value).hex());
     const name = computed(() => chroma(hex.value).name());
     const op = ref(null);
-
     const value = ref(hex.value);
     const gradient = ref(false);
+    const ignoreStops = ref(false);
+    const cm = ref(null);
+
     const style = computed(() => {
       return {
         'background': color.value.toString(),
         'color': chroma(color.value.value).luminance() > .5 ? 'black' : 'white',
       }
     });
+    // const dragging = computed(() => (props.dragging));
+    const isGradient = computed(() => {
+      return stops.value.length > 1;
+    })
 
     const updateColor = debounce(function (value) {
       const color = new Color(value.hex, [[value.hex, 0.5]]);
-      color.id = props.color.id;
-      emit('update:color', color);
+      color.id = id;
+      store.dispatch(Palettes.updateColor, {paletteId, color});
     }, 250);
     const updateStops = debounce(function (stops) {
       const color = new Color(stops[0][0], stops);
-      color.id = props.color.id;
-      emit('update:color', color);
+      color.id = id;
+      store.dispatch(Palettes.updateColor, {paletteId, color});
     }, 250);
-
-    const ignoreStops = ref(false);
 
     watch(value, (value) => {
       ignoreStops.value = true;
@@ -108,18 +118,11 @@ export default defineComponent({
       }
     });
 
-    const dragging = computed(() => (props.dragging));
-
     watch(dragging, (current, prev) => {
       if (current && !prev) {
         op.value.hide();
       }
     })
-
-    const isGradient = computed(() => {
-      return stops.value.length > 1;
-    })
-
     gradient.value = isGradient.value;
 
     function toggle(event, ctrlClick = false) {
@@ -133,7 +136,6 @@ export default defineComponent({
         op.value.toggle(event);
       }
     };
-    const cm = ref(null);
     const contextItems = ref([
             {
                label:'File',
@@ -173,7 +175,7 @@ export default defineComponent({
                label:'Delete',
                icon:'pi pi-fw pi-trash',
                 command: () => {
-                  emit('delete', props.index)
+                  store.dispatch(Palettes.removeColor, {paletteId, index});
                 }
 
             }

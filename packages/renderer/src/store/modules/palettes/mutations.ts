@@ -7,6 +7,7 @@ export enum MutationTypes {
   REMOVE = 'REMOVE',
   CLEAR = 'CLEAR',
   ADD_COLOR = 'ADD_COLOR',
+  EXTEND_COLORS = 'EXTEND_COLORS',
   REMOVE_COLOR = 'REMOVE_COLOR',
   SET_COLORS = 'SET_COLORS',
   CLEAR_COLORS = 'CLEAR_COLORS',
@@ -14,93 +15,91 @@ export enum MutationTypes {
   UPDATE_NAME = 'UPDATE_NAME'
 }
 
-export interface ColorMutation {
-  palette: string
+export namespace PaletteMutations {
+
+    export interface ColorMutation {
+    paletteId: number;
+  }
+
+  export interface AddColor extends ColorMutation {
+    color: Color
+  }
+
+  export interface RemoveColor extends ColorMutation {
+    index: number
+  }
+
+  export interface SetColors extends ColorMutation {
+    colors: Array<Color>
+  }
+
+  export interface UpdateColor extends ColorMutation {
+    color: Color
+  }
+
+  export interface UpdateName {
+    id: number
+    name: string
+  }
 }
 
-export interface AddColor extends ColorMutation {
-  color: Color
-}
-
-export interface RemoveColor extends ColorMutation {
-  index: number
-}
-
-export interface SetColors extends ColorMutation {
-  colors: Array<Color>
-}
-
-export interface UpdateColor extends ColorMutation {
-  index: number
-  color: Color
-}
-
-export interface UpdateName {
-  index: number
-  name: string
-}
 
 export type Mutations<S = State> = {
   [MutationTypes.ADD](state: S, payload: Palette): void;
-  [MutationTypes.SET](state: S, payload: Array<Palette>): void;
-  [MutationTypes.UPDATE_NAME](state: S, payload: UpdateName): void;
-  [MutationTypes.REMOVE](state: S, payload: string): void;
+  [MutationTypes.SET](state: S, payload: Array<number>): void;
+  [MutationTypes.UPDATE_NAME](state: S, payload: PaletteMutations.UpdateName): void;
+  [MutationTypes.REMOVE](state: S, payload: number): void;
   [MutationTypes.CLEAR](state: S): void;
-  [MutationTypes.ADD_COLOR](state: S, payload: AddColor): void;
-  [MutationTypes.UPDATE_COLOR](state: S, payload: UpdateColor): void;
-  [MutationTypes.SET_COLORS](state: S, payload: SetColors): void;
-  [MutationTypes.REMOVE_COLOR](state: S, payload: RemoveColor): void;
-  [MutationTypes.CLEAR_COLORS](state: S, payload: ColorMutation): void;
+  [MutationTypes.EXTEND_COLORS](state: S, payload: Array<Color>): void;
+  [MutationTypes.ADD_COLOR](state: S, payload: PaletteMutations.AddColor): void;
+  [MutationTypes.UPDATE_COLOR](state: S, payload: PaletteMutations.UpdateColor): void;
+  [MutationTypes.SET_COLORS](state: S, payload: PaletteMutations.SetColors): void;
+  [MutationTypes.REMOVE_COLOR](state: S, payload: PaletteMutations.RemoveColor): void;
+  [MutationTypes.CLEAR_COLORS](state: S, payload: PaletteMutations.ColorMutation): void;
 };
 
 export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.ADD](state, payload) {
-    state.list.push({ ...payload });
-    payload.colors.forEach((color: Color) => {
-      state.colors[color.id] = color;
-    });
+    state.order.push(payload.id);
+    state.palettes[payload.id] = { ...payload }
   },
   [MutationTypes.SET](state, payload) {
-    state.list = payload;
-    payload.forEach(palette => {
-      palette.colors.forEach((color: Color) => {
-        state.colors[color.id] = color;
-      });
-    });
+    state.order = payload;
   },
   [MutationTypes.REMOVE](state, payload) {
-    state.list = state.list.filter(({ filename }) => filename !== payload);
+    state.order.splice(payload, 1);
   },
   [MutationTypes.UPDATE_NAME](state, payload) {
-    state.list[payload.index].filename = payload.name;
+    state.palettes[payload.id].filename = payload.name;
   },
   [MutationTypes.CLEAR](state) {
-    state.list = [];
-    state.colors = [];
+    state.order = [];
+    state.palettes = {};
+    state.colors = {};
   },
   [MutationTypes.ADD_COLOR](state, payload) {
-    const index = state.list.findIndex(_ => _.filename === payload.palette);
-    state.list[index].colors.push(payload.color);
     state.colors[payload.color.id] = payload.color;
+    state.palettes[payload.paletteId].colors.push(payload.color.id)
+  },
+  [MutationTypes.EXTEND_COLORS](state, payload) {
+    payload.forEach(color => {
+      state.colors[color.id] = color;
+    })
   },
   [MutationTypes.SET_COLORS](state, payload) {
-    const index = state.list.findIndex(_ => _.filename === payload.palette);
-    state.list[index].colors = [...payload.colors];
-    payload.colors.forEach((color: Color) => {
+    const newColors = payload.colors.filter(color => !(color.id in state.colors));
+    newColors.forEach(color => {
       state.colors[color.id] = color;
     });
+    state.palettes[payload.paletteId].colors = payload.colors.map(c => c.id);
   },
   [MutationTypes.UPDATE_COLOR](state, payload) {
-    const index = state.list.findIndex(_ => _.filename === payload.palette);
-    state.list[index].colors[payload.index] = payload.color;
     state.colors[payload.color.id] = payload.color;
   },
   [MutationTypes.REMOVE_COLOR](state, payload) {
-    const index = state.list.findIndex(_ => _.filename === payload.palette);
-    state.list[index].colors.splice(payload.index, 1);
+    state.palettes[payload.paletteId].colors.splice(payload.index, 1);
   },
   [MutationTypes.CLEAR_COLORS](state, payload) {
-    const index = state.list.findIndex(_ => _.filename === payload.palette);
-    state.list[index].colors = [];
+    state.palettes[payload.paletteId].colors = [];
   },
 };

@@ -4,7 +4,7 @@
       <div class="p-d-flex p-ai-center">
         <Inplace :closable="true" v-model:active="active">
           <template #display>
-              <span class="p-card-title">{{ name }}</span>
+              <span class="p-card-title" v-text="name" />
           </template>
           <template #content>
               <InputText v-model="title" autoFocus @keyup.enter="active=false;" />
@@ -31,40 +31,27 @@
         <template #item="{element, index}">
           <div class="p-m-0 p-p-0">
             <color-card
-              :color="element"
+              :id="element.id"
               :index="index"
+              :paletteId="paletteId"
               :dragging="drag"
               :key="element.id"
-              @delete="removeColor"
-              @update:color="updateColor($event, index)"
             />
           </div>
         </template>
-          <template #footer>
-            <div class="p-d-flex p-ai-center" key="palette-footer">
-              <p-btn icon="pi pi-plus" class="p-ml-3 p-button-outlined p-button-secondary p-button-icon-only p-button-rounded" @click="addColor"/>
-            </div>
-        </template>
       </draggable>
-    </template>
-    <template #footer2>
-      {{ palette.dirname }}/{{ palette.filename }}
-      <div>
-        {{ xPalette }}
-      </div>
     </template>
   </Card>
 </template>
 
 <script lang="ts">
 import {defineComponent, computed, reactive, ref, unref, watchEffect} from 'vue';
-// import Card from 'primevue/card';
 import chroma from 'chroma-js';
 import Card from './Card.vue';
 import Inplace from 'primevue/inplace';
 import InputText from 'primevue/inputtext';
 import draggable from 'vuedraggable';
-import {Color} from '/@/store/modules/palettes/index';
+import {Color, Palette} from '/@/store/modules/palettes/index';
 import Menu from 'primevue/menu';
 import ColorCard from './Color.vue';
 import useStore from '/@/store';
@@ -84,8 +71,8 @@ export default defineComponent({
   name: 'Palette',
   components: { Card, ColorCard, draggable, Inplace, InputText, Menu },
   props: {
-    palette: {
-      type: Object,
+    paletteId: {
+      type: Number,
       required: true,
     },
     index: {
@@ -93,21 +80,41 @@ export default defineComponent({
       required: true,
     }
   },
-  setup ({ palette, index}) {
-    const store = useStore();
-    const name = computed(() => palette.filename.split('.')[0]);
+  setup ({ paletteId}) {
+    // data
     const drag = ref(false);
     const controlOnStart = ref(true);
     const menu = ref(null);
-    const title = computed({
+    const active = ref(false);
+
+    // computed
+    const store = useStore();
+    const palette = computed(() => {
+      return store.getters.palette(paletteId);
+    });
+    const name = computed(() => palette.value.filename.split('.')[0]);
+        const title = computed({
       get() {
-        return palette.filename.split('.')[0];
+        return name.value;
       },
       set(name: string) {
-        store.dispatch(Palettes.updateName, {name: `${name}.xpalette`, index});
+        store.dispatch(Palettes.updateName, {name: `${name}.xpalette`, id: paletteId});
       }
     });
+    const colors = computed({
+      get(){
+         return palette.value.colors;
+        },
+      set(colors: Array<Color>){
+        store.dispatch(Palettes.setColors, {paletteId, colors});
+      },
+    });
 
+    const xPalette = computed(() => {
+      return `${colors.value.map(color => color.toXPalette()).join(',')},`;
+    });
+
+    // methods
     interface StartEvent {
       originalEvent: DragEvent
     }
@@ -121,40 +128,15 @@ export default defineComponent({
       return controlOnStart.value ? 'clone' : true;
     }
 
-    const colors = computed({
-      get(){
-         return palette.colors.map(c => store.state.palettes.colors[c.id]);
-        },
-      set(value: Array<Color>){
-        store.dispatch(Palettes.setColors, {palette: palette.filename, colors: value});
-      },
-    });
-    function updateColors(colors: Color[]){
-      const values = colors.map(c => store.state.palettes.colors[c.id]);
-      store.dispatch(Palettes.setColors, {palette: palette.filename, colors: values});
-    };
-
-    function updateColor(color: Color, index: number) {
-      store.dispatch(Palettes.updateColor, {palette: palette.filename, color});
-    }
-
     function addColor() {
       const color = new Color(chroma.random().hex());
-      store.dispatch(Palettes.addColor, {palette: palette.filename, color });
-    }
-
-    function removeColor(event) {
-      store.dispatch(Palettes.removeColor, {palette: palette.filename, index: event });
+      store.dispatch(Palettes.addColor, {paletteId, color });
     }
 
     function clone({ id }: Color) {
       const color = store.state.palettes.colors[id];
-      return new Color(color.value, color.stops);
+      return new Color(color.value, cloneDeep(color.stops));
     }
-    const xPalette = computed(() => {
-      return `${colors.value.map(c => c.toXPalette()).join(',')},`;
-    })
-    const active = ref(false);
 
     const panelOptions = ref([
         {
@@ -168,29 +150,28 @@ export default defineComponent({
             label: 'Random Order',
             icon: 'pi pi-refresh',
             command: () => {
-              shuffleArray(palette.colors);
-              updateColors(palette.colors);
+              shuffleArray(colors.value);
+              store.dispatch(Palettes.setColors, {paletteId, colors: colors.value});
             }
         },
         {
             label: 'Reverse Order',
             icon: 'pi pi-sort-alpha-up-alt',
             command: () => {
-              updateColors(palette.colors.reverse());
+              store.dispatch(Palettes.setColors, {paletteId, colors: colors.value.reverse()});
             }
         },
               {
             label: 'Clone',
             icon: 'pi pi-clone',
             command: () => {
-              const clone = {
-                filename: palette.filename.replace('.xpalette', '-copy.xpalette'),
-                dirname: palette.dirname,
-                colors: []
-              }
-              palette.colors.forEach((c) => {
-                clone.colors.push(new Color(c.value, cloneDeep(c.stops)))
-              });
+              const colors = palette.value.colors.map(c => new Color(c.value, cloneDeep(c.stops)));
+              const clone = new Palette(
+                palette.value.filename.replace('.xpalette', '-copy.xpalette'),
+                palette.value.dirname,
+                colors.map(c => c.id)
+              );
+              store.dispatch(Palettes.extendColors, colors);
               store.dispatch(Palettes.add, clone);
             }
         },
@@ -221,7 +202,22 @@ export default defineComponent({
       }
     }
 
-    return { palette, name, drag, colors, start, pullFunction, updateColor, clone, xPalette, title, active, panelOptions, menu, toggleMenu, addColor, removeColor };
+    return {
+      active,
+      addColor,
+      clone,
+      colors,
+      drag,
+      menu,
+      name,
+      paletteId,
+      panelOptions,
+      pullFunction,
+      start,
+      title,
+      toggleMenu,
+      xPalette,
+   };
   },
 });
 </script>
