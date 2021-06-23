@@ -43,6 +43,7 @@ import { Color } from '/@/store/modules/palettes/color';
 import debounce from 'lodash.debounce';
 import useStore from '/@/store';
 import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
+import { emitter } from '/@/bus';
 
 
 
@@ -61,7 +62,7 @@ export default defineComponent({
     index: {
       type: Number,
       required: false,
-      default: 0,
+      default: 0
     },
     dragging: {
       type: Boolean,
@@ -69,7 +70,8 @@ export default defineComponent({
       default: false
     }
   },
-  setup ({ paletteId, id, index, dragging: isDragging}, { emit }) {
+  setup ({ paletteId, id, dragging: isDragging}, { emit }) {
+    // data
     const dragging = ref(isDragging);
     const store = useStore();
     const color = computed(() => {
@@ -78,10 +80,10 @@ export default defineComponent({
     const stops = ref(color.value.stops.map(stop => [...stop]));
     const hex = computed(() => chroma(color.value.value).hex());
     const name = computed(() => chroma(hex.value).name());
-    const op = ref(null);
     const value = ref(hex.value);
     const gradient = ref(false);
     const ignoreStops = ref(false);
+    const op = ref(null);
     const cm = ref(null);
 
     const style = computed(() => {
@@ -175,7 +177,7 @@ export default defineComponent({
                label:'Delete',
                icon:'pi pi-fw pi-trash',
                 command: () => {
-                  store.dispatch(Palettes.removeColor, {paletteId, index});
+                  store.dispatch(Palettes.removeColor, {paletteId, id});
                 }
 
             }
@@ -183,10 +185,29 @@ export default defineComponent({
 
     function onContextMenu(event){
       if (cm.value) {
+        emitter.emit('contextmenu');
         cm.value.show(event);
       }
     }
-  return { style, hex, value, op, toggle, gradient, stops, isGradient, name, contextItems, onContextMenu, cm};
+    emitter.on('contextmenu', () => {
+      if (cm.value && cm.value.visible) {
+        cm.value.hide();
+      }
+    });
+  return {
+    cm,
+    contextItems,
+    gradient,
+    hex,
+    isGradient,
+    name,
+    onContextMenu,
+    op,
+    stops,
+    style,
+    toggle,
+    value,
+  };
   },
 });
 </script>

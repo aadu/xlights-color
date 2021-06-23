@@ -57,6 +57,7 @@
     "fast-json-stable-stringify": "^2.1.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.debounce": "^4.0.8",
+    "mitt": "^2.1.0",
     "primeflex": "^2.0.0",
     "primeicons": "^4.1.0",
     "primevue": "^3.5.1",
