@@ -14,8 +14,9 @@
 - [x] Reverse Color Order
 - [x] Create Palette Backup
 - [x] Randomize color
-- [ ] Sort Palettes
-- [ ] Filter Palettes
+- [x] Sort Palettes
+- [x] Filter Palettes
+- [x] Help section
 - [ ] Darken/Lighten color
 - [ ] Mix/blend colors
 - [ ] Interprolate Colors

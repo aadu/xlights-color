@@ -1,8 +1,9 @@
 <template>
   <div
     id="content-wrapper"
-    class="p-m-0 p-p-3">
-      <router-view />
+    class="p-m-0 p-p-3"
+  >
+    <router-view />
   </div>
 </template>
 

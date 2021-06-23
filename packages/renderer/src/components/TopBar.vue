@@ -19,25 +19,34 @@
       >
         Set Directory
       </p-btn>
-      <p-btn icon="pi pi-question" class="p-button-sm p-button-text p-button-link p-mr-2" @click="openDialog"></p-btn>
+      <p-btn
+        icon="pi pi-question"
+        class="p-button-sm p-button-text p-button-link p-mr-2"
+        @click="openDialog"
+      />
     </template>
   </toolbar>
-    <Dialog header="About XLights Color Palette Editor" v-model:visible="dialog" :style="{width: '50vw'}" :dismissableMask="true" :modal="true">
-      <Fieldset legend="Toggle Gradient/Solid Color">
-          Control-click on a color
+  <Dialog
+    v-model:visible="dialog"
+    header="About XLights Color Palette Editor"
+    :style="{width: '50vw'}"
+    :dismissable-mask="true"
+    :modal="true"
+  >
+    <Fieldset legend="Toggle Gradient/Solid Color">
+      Control-click on a color
     </Fieldset>
     <Fieldset legend="Move Color to Another Pallete">
-          Click and drag the color
+      Click and drag the color
     </Fieldset>
     <Fieldset legend="Copy Color to Another Pallete">
-          Press control and then click and drag the color
+      Press control and then click and drag the color
     </Fieldset>
-      <Fieldset legend="Save">
-        Right-click on a color to access that Palette's context menu
+    <Fieldset legend="Save">
+      Right-click on a color to access that Palette's context menu
     </Fieldset>
-        <p>&copy; Aaron Duke 2021</p>
-    </Dialog>
-
+    <p>&copy; Aaron Duke 2021</p>
+  </Dialog>
 </template>
 
 <script lang="ts">

@@ -22,7 +22,7 @@ export class Color {
       this.stops = this.parseGradient(value);
     }
     if (this.stops.length === 0) {
-      this.stops.push([this.value, 0.5])
+      this.stops.push([this.value, 0.5]);
     } else {
       this.value = this.stops[0][0];
     }
@@ -31,7 +31,7 @@ export class Color {
   parseGradient(value: string): Array<[string, number]>{
     const result = value.match(/(?<=Values=)([^|]+)/);
     if (!result) {
-      return []
+      return [];
     }
     const stops: Stops = [];
     result[0].split(';').forEach((stop) => {
@@ -44,11 +44,11 @@ export class Color {
   }
 
   isGradient() {
-    return this.stops && this.stops.length > 1
+    return this.stops && this.stops.length > 1;
   }
 
   isValid() {
-    return chroma.valid(this.value)
+    return chroma.valid(this.value);
   }
 
   toString(){

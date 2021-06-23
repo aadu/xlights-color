@@ -62,7 +62,7 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.ADD](state, payload) {
     state.order.push(payload.id);
-    state.palettes[payload.id] = { ...payload }
+    state.palettes[payload.id] = { ...payload };
   },
   [MutationTypes.SET](state, payload) {
     state.order = payload;
@@ -87,7 +87,7 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.EXTEND_COLORS](state, payload) {
     payload.forEach(color => {
       state.colors[color.id] = color;
-    })
+    });
   },
   [MutationTypes.SET_COLORS](state, payload) {
     const newColors = payload.colors.filter(color => !(color.id in state.colors));
@@ -100,7 +100,7 @@ export const mutations: MutationTree<State> & Mutations = {
     state.colors[payload.color.id] = payload.color;
   },
   [MutationTypes.REMOVE_COLOR](state, payload) {
-    const colors = state.palettes[payload.paletteId].colors
+    const colors = state.palettes[payload.paletteId].colors;
     const index = colors.findIndex((id => id === payload.id));
     state.palettes[payload.paletteId].colors.splice(index, 1);
   },

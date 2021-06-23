@@ -1,12 +1,12 @@
 <template>
-<div class="p-d-flex p-ai-center p-m-0 p-p-0 card-container">
-  <div class="card-title p-m-0 p-p-0">
-    <slot name="title" />
+  <div class="p-d-flex p-ai-center p-m-0 p-p-0 card-container">
+    <div class="card-title p-m-0 p-p-0">
+      <slot name="title" />
+    </div>
+    <div class="card-content p-m-0 p-p-0">
+      <slot name="content" />
+    </div>
   </div>
-  <div class="card-content p-m-0 p-p-0">
-    <slot name="content" />
-  </div>
-</div>
 </template>
 
 <script lang="ts">

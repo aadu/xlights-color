@@ -2,15 +2,26 @@
   <Card class="p-mb-2 p-py-0 p-mx-2 palette">
     <template #title>
       <div class="p-d-flex p-ai-center">
-        <Inplace :closable="true" v-model:active="active">
+        <Inplace
+          v-model:active="active"
+          :closable="true"
+        >
           <template #display>
-            <span class="p-card-title p-d-inline-block p-ml-2" v-text="name" style="min-width: 141px;" />
+            <span
+              class="p-card-title p-d-inline-block p-ml-2"
+              style="min-width: 141px;"
+              v-text="name"
+            />
           </template>
           <template #content>
-            <InputText v-model="title" autoFocus @keyup.enter="active=false;" />
+            <InputText
+              v-model="title"
+              auto-focus
+              @keyup.enter="active=false;"
+            />
           </template>
-      </Inplace>
-    </div>
+        </Inplace>
+      </div>
     </template>
     <template #content>
       <draggable
@@ -30,10 +41,10 @@
           <div class="p-m-0 p-p-0">
             <color-card
               :id="element.id"
-              :index="index"
-              :paletteId="paletteId"
-              :dragging="drag"
               :key="element.id"
+              :index="index"
+              :palette-id="paletteId"
+              :dragging="drag"
               v-on="commands"
             />
           </div>
@@ -53,7 +64,7 @@ import draggable from 'vuedraggable';
 import {Color, Palette} from '/@/store/modules/palettes/index';
 import ColorCard from './Color.vue';
 import useStore from '/@/store';
-import cloneDeep from 'lodash.clonedeep'
+import cloneDeep from 'lodash.clonedeep';
 import { ActionTypes as Palettes } from '/@/store/modules/palettes/index';
 // see https://github.com/SortableJS/vue.draggable.next/blob/master/example/components/clone-on-control.vue
 
@@ -68,7 +79,6 @@ function shuffleArray(array) {
 export default defineComponent({
   name: 'Palette',
   components: { Card, ColorCard, draggable, Inplace, InputText },
-  emits: ['save:palette', 'delete:palette'],
   props: {
     paletteId: {
       type: Number,
@@ -77,8 +87,9 @@ export default defineComponent({
     index: {
       type: Number,
       required: true,
-    }
+    },
   },
+  emits: ['save:palette', 'delete:palette'],
   setup ({ paletteId }, { emit }) {
     // data
     const drag = ref(false);
@@ -97,7 +108,7 @@ export default defineComponent({
       },
       set(name: string) {
         store.dispatch(Palettes.updateName, {name: `${name}.xpalette`, id: paletteId});
-      }
+      },
     });
     const colors = computed({
       get(){
@@ -137,7 +148,7 @@ export default defineComponent({
     }
     const commands = ref({
       'save:palette': () => {
-        emit('save:palette', paletteId)
+        emit('save:palette', paletteId);
       },
       'randomize:order': () => {
         shuffleArray(colors.value);
@@ -153,11 +164,11 @@ export default defineComponent({
         await store.dispatch(Palettes.setColors, {paletteId, colors});
       },
       'new:palette': async () => {
-        const colors = [...Array(8).keys()].map(() => (new Color(chroma.random().hex())))
+        const colors = [...Array(8).keys()].map(() => (new Color(chroma.random().hex())));
         const palette = new Palette(
           `Palette${store.state.palettes.order.length}.xpalette`,
           store.state.workspaces.current,
-          colors.map(c => c.id)
+          colors.map(c => c.id),
         );
         await store.dispatch(Palettes.extendColors, colors);
         await store.dispatch(Palettes.add, palette);
@@ -167,7 +178,7 @@ export default defineComponent({
         const clone = new Palette(
           palette.value.filename.replace('.xpalette', '-copy.xpalette'),
           palette.value.dirname,
-          colors.map(c => c.id)
+          colors.map(c => c.id),
         );
         store.dispatch(Palettes.extendColors, colors);
         store.dispatch(Palettes.add, clone);
@@ -184,7 +195,7 @@ export default defineComponent({
       'delete:palette': () => {
         store.dispatch(Palettes.remove, paletteId);
         emit('delete:palette', paletteId);
-      }
+      },
     });
 
 

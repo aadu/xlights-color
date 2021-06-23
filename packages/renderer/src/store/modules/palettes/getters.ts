@@ -3,7 +3,7 @@ import type { State, Palette, Color } from './index';
 import type { RootState } from '/@/store';
 
 
-interface PaletteDetail extends Omit<Palette, "colors"> {
+interface PaletteDetail extends Omit<Palette, 'colors'> {
   colors: Array<Color>;
 }
 
@@ -20,14 +20,14 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   palette: (state) => {
     return (id) => {
-      return {...state.palettes[id], colors: state.palettes[id].colors.map(colorId => state.colors[colorId])}
-    }
+      return {...state.palettes[id], colors: state.palettes[id].colors.map(colorId => state.colors[colorId])};
+    };
   },
   xPalette: (state) => {
     return (id) => {
       const colors = state.colors;
       const palette = state.palettes[id];
       return `${palette.colors.map((colorId: number) => colors[colorId].toXPalette()).join(',')},`;
-    }
-  }
+    };
+  },
 };

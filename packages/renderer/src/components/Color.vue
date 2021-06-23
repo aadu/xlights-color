@@ -7,7 +7,11 @@
     @contextmenu="onContextMenu"
   >
     <template #content>
-      <span v-if="!isGradient" v-text="name" class="color-name" />
+      <span
+        v-if="!isGradient"
+        class="color-name"
+        v-text="name"
+      />
       <svg
         v-if="index >= 8"
         class="overlay"
@@ -24,10 +28,24 @@
       </svg>
     </template>
   </Card>
-  <ContextMenu ref="cm" :model="contextItems" />
-  <OverlayPanel ref="op" class="color-picker-container">
-    <GradientPicker style="box-shadow: none;" v-if="gradient" v-model="stops" />
-    <ColorPicker v-model="value" v-else style="box-shadow: none;"/>
+  <ContextMenu
+    ref="cm"
+    :model="contextItems"
+  />
+  <OverlayPanel
+    ref="op"
+    class="color-picker-container"
+  >
+    <GradientPicker
+      v-if="gradient"
+      v-model="stops"
+      style="box-shadow: none;"
+    />
+    <ColorPicker
+      v-else
+      v-model="value"
+      style="box-shadow: none;"
+    />
   </OverlayPanel>
 </template>
 
@@ -62,13 +80,13 @@ export default defineComponent({
     index: {
       type: Number,
       required: false,
-      default: 0
+      default: 0,
     },
     dragging: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   emits: ['randomize:colors', 'reverse:order', 'delete:palette', 'download:palette', 'clone:palette', 'randomize:order', 'new:palette', 'save:palette'],
   setup (props, { emit }) {
@@ -92,12 +110,12 @@ export default defineComponent({
       return {
         'background': color.value.toString(),
         'color': chroma(color.value.value).luminance() > .5 ? 'black' : 'white',
-      }
+      };
     });
     // const dragging = computed(() => (props.dragging));
     const isGradient = computed(() => {
       return stops.value.length > 1;
-    })
+    });
 
     const updateColor = debounce(function (value) {
       const color = new Color(value.hex, [[value.hex, 0.5]]);
@@ -126,7 +144,7 @@ export default defineComponent({
       if (current && !prev) {
         op.value.hide();
       }
-    })
+    });
     gradient.value = isGradient.value;
 
     function toggle(event, ctrlClick = false) {
@@ -139,7 +157,7 @@ export default defineComponent({
       } else if (op.value) {
         op.value.toggle(event);
       }
-    };
+    }
     const contextItems = ref([
             {
                label:'Palette',
@@ -154,70 +172,66 @@ export default defineComponent({
                               icon:'pi pi-fw pi-plus-circle',
                               command: () => {
                                 emit('new:palette', paletteId);
-                              }
+                              },
                            },
-                           {
-                              label:'Default',
-                              icon:'pi pi-fw pi-video'
-                           },
-                        ]
+                        ],
                     },
                     {
                         label:'Clone',
                         icon:'pi pi-clone',
                         command: () => {
                           emit('clone:palette', paletteId);
-                        }
+                        },
                     },
                     {
                         label:'Randomize Order',
                         icon:'pi pi-refresh',
                         command: () => {
                           emit('randomize:order', paletteId);
-                        }
+                        },
                     },
                       {
                         label:'Randomize Colors',
                         icon:'pi-replay',
                         command: () => {
                           emit('randomize:colors', paletteId);
-                        }
+                        },
                     },
                     {
                         label:'Reverse Order',
                         icon:'pi pi-sort-alpha-up-alt',
                         command: () => {
                           emit('reverse:order', paletteId);
-                        }
+                        },
                     },
                        {
-                       separator:true
+                       separator:true,
                     },
                       {
                         label:'Delete',
                         icon:'pi pi-fw pi-trash',
                         command: () => {
                           emit('delete:palette', paletteId);
-                        }
+                        },
                     },
                     {
                        label:'Export',
                        icon:'pi pi-fw pi-external-link',
                        command: () => {
                           emit('download:palette', paletteId);
-                        }
+                        },
                     },
                     {
                       label: 'Save',
                       icon: 'pi pi-fw pi-save',
                       command: () => {
                         emit('save:palette', paletteId);
-                      }
-                    }
-                ]
+                      },
+                    },
+                ],
             },
             {
-               separator:true
+               separator:true,
             },
             {
                label:'New',
@@ -225,7 +239,7 @@ export default defineComponent({
                 command: () => {
                   const color = new Color(chroma.random().hex());
                   store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
-                }
+                },
 
             },
             {
@@ -234,26 +248,26 @@ export default defineComponent({
                 command: () => {
                   const color = new Color(hex.value, stops.value);
                   store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
-                }
+                },
             },
             {
                label:'Randomize',
                icon:'pi pi-refresh',
                 command: () => {
                   value.value = {hex: chroma.random().hex()};
-                }
+                },
             },
             {
-               separator:true
+               separator:true,
             },
             {
                label:'Delete',
                icon:'pi pi-fw pi-trash',
                 command: () => {
                   store.dispatch(Palettes.removeColor, {paletteId, id});
-                }
+                },
 
-            }
+            },
         ]);
 
     function onContextMenu(event){

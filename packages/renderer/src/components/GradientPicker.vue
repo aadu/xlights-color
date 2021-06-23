@@ -63,8 +63,8 @@
 </template>
 
 <script lang="ts">
-import cloneDeep from 'lodash.clonedeep'
-import stringify from 'fast-json-stable-stringify'
+import cloneDeep from 'lodash.clonedeep';
+import stringify from 'fast-json-stable-stringify';
 import { Sketch  } from '@ckpack/vue-color';
 import {defineComponent, computed, reactive, watch, ref, unref, onBeforeUnmount, toRaw } from 'vue';
 
@@ -87,21 +87,21 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Array,
-      default: () => cloneDeep(defaultStops)
+      default: () => cloneDeep(defaultStops),
     },
   },
   emits: ['update:modelValue'],
   setup(props, {emit}) {
     const currentStopIdx = ref(0);
     const containerBoundingClientRectangle = ref({});
-    const internalAngle = ref(90)
+    const internalAngle = ref(90);
     const stopsContainer = ref(null);
     const stops = reactive(toRaw(props.modelValue));
     watch(() => cloneDeep(stops), (current, previous) => {
       if (stringify(current) != stringify(previous)) {
-        emit('update:modelValue', current)
+        emit('update:modelValue', current);
       }
-    }, {deep: true})
+    }, {deep: true});
 
     const angle = computed({
       get() {
@@ -189,7 +189,7 @@ export default defineComponent({
       const previousPosition = stops[currentStopIdx.value][POSITION];
       stops[currentStopIdx.value][POSITION] = position;
       if (previousPosition != position) {
-        console.debug('update-position')
+        console.debug('update-position');
       }
     }
 
@@ -259,7 +259,7 @@ export default defineComponent({
       stopStyle,
       unbindEventListeners,
     };
-  }
+  },
 });
 </script>
 
