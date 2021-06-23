@@ -1,5 +1,7 @@
 {
-  "name": "vite-electron-builder",
+  "name": "xlights-color-palette-editor",
+  "author": "Aaron Duke",
+  "description": "XLights Color Palette Editor",
   "private": true,
   "engines": {
     "node": ">=v14.16",
