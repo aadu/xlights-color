@@ -7,15 +7,15 @@
 - [x] Delete Palette
 - [x] Edit Palette Name
 - [x] Gradient Palettes
-- [ ] Write Palettes
+- [x] Write Palettes
 - [x] Download Palettes (zipped)
 - [x] Random Palette Permutation
 - [x] Color Names via Chroma.js
 - [x] Reverse Color Order
+- [x] Create Palette Backup
+- [x] Randomize color
 - [ ] Sort Palettes
 - [ ] Filter Palettes
-- [ ] Create Palette Backup
-- [x] Randomize color
 - [ ] Darken/Lighten color
 - [ ] Mix/blend colors
 - [ ] Interprolate Colors

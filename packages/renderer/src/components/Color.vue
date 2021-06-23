@@ -70,7 +70,7 @@ export default defineComponent({
       default: false
     }
   },
-  emits: ['randomize:colors', 'reverse:order', 'delete:palette', 'download:palette', 'clone:palette', 'randomize:order', 'new:palette'],
+  emits: ['randomize:colors', 'reverse:order', 'delete:palette', 'download:palette', 'clone:palette', 'randomize:order', 'new:palette', 'save:palette'],
   setup (props, { emit }) {
     const { paletteId, id, dragging: isDragging} = props;
     // data

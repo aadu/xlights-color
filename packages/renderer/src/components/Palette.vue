@@ -68,6 +68,7 @@ function shuffleArray(array) {
 export default defineComponent({
   name: 'Palette',
   components: { Card, ColorCard, draggable, Inplace, InputText },
+  emits: ['save:palette', 'delete:palette'],
   props: {
     paletteId: {
       type: Number,
@@ -78,7 +79,7 @@ export default defineComponent({
       required: true,
     }
   },
-  setup ({ paletteId}) {
+  setup ({ paletteId }, { emit }) {
     // data
     const drag = ref(false);
     const controlOnStart = ref(true);
@@ -135,6 +136,9 @@ export default defineComponent({
       return new Color(color.value, cloneDeep(color.stops));
     }
     const commands = ref({
+      'save:palette': () => {
+        emit('save:palette', paletteId)
+      },
       'randomize:order': () => {
         shuffleArray(colors.value);
         store.dispatch(Palettes.setColors, {paletteId, colors: colors.value});
@@ -179,6 +183,7 @@ export default defineComponent({
       },
       'delete:palette': () => {
         store.dispatch(Palettes.remove, paletteId);
+        emit('delete:palette', paletteId);
       }
     });
 

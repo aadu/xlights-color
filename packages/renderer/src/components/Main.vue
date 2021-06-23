@@ -9,6 +9,7 @@
           :key="slotProps.data.id"
           :paletteId="slotProps.data.id"
           :index="slotProps.index"
+          v-on="commands"
         />
       </template>
       <template #footer>
@@ -67,6 +68,48 @@ export default defineComponent({
     const currentWorkspace = computed(() => (store.state.workspaces.current));
     const palettes = computed(() => (store.getters.palettes));
 
+
+    async function exists(path) {
+        let exists = false;
+        try {
+          await electron.stat(path);
+          exists = true;
+        } catch (error) {
+          exists = false;
+        }
+        return exists
+    }
+
+    async function makeBackup(paletteId: number) {
+      const palette = store.getters.palette(paletteId);
+      const path = `${palette.dirname}/${palette.filename}`
+        const backupPath = `${palette.dirname}/.backup/${new Date().getTime().toString()}-${palette.filename}`
+        const doesExist = await exists(path);
+        if (doesExist) {
+          await electron.mkdir(`${palette.dirname}/.backup`, {recursive: true})
+          await electron.copyFile(path, backupPath);
+        }
+    }
+
+    const commands = reactive({
+      'save:palette': async (paletteId: number) => {
+        const palette = store.getters.palette(paletteId);
+        const xPalette = store.getters.xPalette(paletteId);
+        const path = `${palette.dirname}/${palette.filename}`
+        await makeBackup(paletteId);
+        await electron.writeFile(path, xPalette);
+      },
+      'delete:palette': async (paletteId: number) => {
+        const palette = store.getters.palette(paletteId);
+        const path = `${palette.dirname}/${palette.filename}`
+        const doesExist = await exists(path);
+        if (doesExist) {
+          await makeBackup(paletteId);
+          await electron.rm(path);
+        }
+      },
+    })
+
     watchEffect(async () => {
         await readDirectory(currentWorkspace.value);
       });
@@ -86,7 +129,7 @@ export default defineComponent({
       return store.getters.xPalette(id);
     }
 
-    return { palettes, currentWorkspace, addNewPalette, xPalette };
+    return { palettes, currentWorkspace, addNewPalette, xPalette, commands };
 
   },
 });
