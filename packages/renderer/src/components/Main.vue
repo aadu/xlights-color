@@ -1,8 +1,23 @@
 <template>
   <main id="palettes-wrapper">
-    <DataView :value="palettes" layout="list">
+    <DataView :value="palettes" layout="list" :paginator="true" :rows="10" :sortOrder="sortOrder" :sortField="sortField">
       <template #header>
-          <TopBar />
+          <TopBar>
+            <span class="p-input-icon-left">
+              <i class="pi pi-search" />
+                <InputText v-model="searchText" type="text" class="p-inputtext-sm" placeholder="Search"/>
+            </span>
+              <p-btn icon="pi pi-times" class="p-button-sm p-button-text" :disabled="searchText===''" @click="searchText='';"></p-btn>
+              <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label" placeholder="Sort By" @change="onSortChange($event)" class="p-inputtext-sm" />
+            </TopBar>
+          <div class="p-grid p-nogutter">
+            <div class="p-col-6" style="text-align: left">
+
+            </div>
+            <div class="p-col-6" style="text-align: right">
+
+            </div>
+        </div>
       </template>
       <template #list="slotProps">
         <palette-card
@@ -16,7 +31,7 @@
         <p-btn icon="pi pi-plus-circle" class="p-ml-2 p-my-2" label="Add Palette" @click="addNewPalette"></p-btn>
       </template>
     </DataView>
-    <Card>
+    <Card v-if="debug">
       <template #content>
         <div v-for="(palette, i) in palettes" :key="i">
           <h4>{{ palette.filename }}</h4>
@@ -28,11 +43,13 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed, reactive, watchEffect, watch} from 'vue';
+import {defineComponent, computed, reactive, watchEffect, ref} from 'vue';
 import Card from 'primevue/card';
 import useStore from '/@/store';
 import chroma from 'chroma-js';
 import DataView from 'primevue/dataview';
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
 import { parsePalette } from '/@/store/modules/palettes/palette';
 import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
@@ -41,13 +58,13 @@ import GradientPicker from './GradientPicker.vue';
 import TopBar from '/@/components/TopBar.vue';
 
 
-
 export default defineComponent({
   name: 'Palettes',
-  components: { PaletteCard, GradientPicker, DataView, Card, TopBar },
+  components: { PaletteCard, GradientPicker, DataView, Card, TopBar, Dropdown, InputText },
   setup () {
     const store = useStore();
     const electron = useElectron();
+    const debug = ref(false);
 
     async function addPalette(filename: string, dirname: string) {
         const content = (await electron.readFile(`${dirname}/${filename}`, {encoding: 'utf-8'}));
@@ -66,8 +83,10 @@ export default defineComponent({
     }
 
     const currentWorkspace = computed(() => (store.state.workspaces.current));
-    const palettes = computed(() => (store.getters.palettes));
-
+    const searchText = ref('');
+    const palettes = computed(() => {
+      return searchText.value ? store.getters.palettes.filter(({filename}) => (filename.match(new RegExp(searchText.value)))) : store.getters.palettes;
+    });
 
     async function exists(path) {
         let exists = false;
@@ -129,7 +148,30 @@ export default defineComponent({
       return store.getters.xPalette(id);
     }
 
-    return { palettes, currentWorkspace, addNewPalette, xPalette, commands };
+      const sortKey = ref({label: 'Name A-Z', value: 'filename'});
+      const sortOrder = ref(1);
+      const sortField = ref('filename');
+      const sortOptions = ref([
+          {label: 'Name A-Z', value: 'filename'},
+          {label: 'Name Z-A', value: '!filename'},
+      ]);
+      const onSortChange = (event) => {
+          const value = event.value.value;
+          const sortValue = event.value;
+
+          if (value.indexOf('!') === 0) {
+              sortOrder.value = -1;
+              sortField.value = value.substring(1, value.length);
+              sortKey.value = sortValue;
+          }
+          else {
+              sortOrder.value = 1;
+              sortField.value = value;
+              sortKey.value = sortValue;
+          }
+      };
+
+    return { palettes, currentWorkspace, addNewPalette, xPalette, commands, sortOptions, onSortChange, sortKey, sortOrder, sortField, searchText, debug};
 
   },
 });

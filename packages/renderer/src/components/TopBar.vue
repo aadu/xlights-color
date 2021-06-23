@@ -5,7 +5,7 @@
   >
     <template #left>
       <div class="p-mx-2">
-        xLights Color Palette Editor
+        <slot />
       </div>
     </template>
     <template #right>
@@ -19,25 +19,43 @@
       >
         Set Directory
       </p-btn>
+      <p-btn icon="pi pi-question" class="p-button-sm p-button-text p-button-link p-mr-2" @click="openDialog"></p-btn>
     </template>
   </toolbar>
+    <Dialog header="About XLights Color Palette Editor" v-model:visible="dialog" :style="{width: '50vw'}" :dismissableMask="true" :modal="true">
+      <Fieldset legend="Toggle Gradient/Solid Color">
+          Control-click on a color
+    </Fieldset>
+    <Fieldset legend="Move Color to Another Pallete">
+          Click and drag the color
+    </Fieldset>
+    <Fieldset legend="Copy Color to Another Pallete">
+          Press control and then click and drag the color
+    </Fieldset>
+      <Fieldset legend="Save">
+        Right-click on a color to access that Palette's context menu
+    </Fieldset>
+        <p>&copy; Aaron Duke 2021</p>
+    </Dialog>
+
 </template>
 
 <script lang="ts">
-import {defineComponent, computed} from 'vue';
+import {defineComponent, computed, ref} from 'vue';
 import Toolbar from 'primevue/toolbar';
 import useStore from '/@/store';
 import { ActionTypes as Workspaces } from '/@/store/modules/workspaces/index';
 import {useElectron} from '/@/use/electron';
+import Dialog from 'primevue/dialog';
+import Fieldset from 'primevue/fieldset';
 
 
 
 export default defineComponent({
   name: 'TopBar',
-  components: { Toolbar },
+  components: { Toolbar, Dialog, Fieldset},
   setup () {
     const store = useStore();
-
     async function setDirectory() {
       const electron = useElectron();
       const result = await electron.dialog.showOpenDialog({
@@ -50,7 +68,13 @@ export default defineComponent({
       }
     }
     const currentWorkspace = computed(() => store.state.workspaces.current);
-    return { setDirectory, currentWorkspace };
+    const dialog = ref(false);
+    function openDialog() {
+      dialog.value = true;
+
+    }
+
+    return { setDirectory, currentWorkspace, openDialog, dialog };
   },
 });
 </script>
