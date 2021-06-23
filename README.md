@@ -20,3 +20,5 @@
 - [ ] Darken/Lighten color
 - [ ] Mix/blend colors
 - [ ] Interprolate Colors
+- [ ] Persistent State
+- [ ] Config File
