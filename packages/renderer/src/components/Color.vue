@@ -70,8 +70,9 @@ export default defineComponent({
       default: false
     }
   },
-  emits: ['randomize:colors', 'reverse:colors', 'delete:palette', 'download:palette', 'clone:palette'],
-  setup ({ paletteId, id, dragging: isDragging}, { emit }) {
+  emits: ['randomize:colors', 'reverse:order', 'delete:palette', 'download:palette', 'clone:palette', 'randomize:order', 'new:palette'],
+  setup (props, { emit }) {
+    const { paletteId, id, dragging: isDragging} = props;
     // data
     const dragging = ref(isDragging);
     const store = useStore();
@@ -149,11 +150,14 @@ export default defineComponent({
                         icon:'pi pi-fw pi-plus',
                         items:[
                            {
-                              label:'Bookmark',
-                              icon:'pi pi-fw pi-bookmark'
+                              label:'Random',
+                              icon:'pi pi-fw pi-plus-circle',
+                              command: () => {
+                                emit('new:palette', paletteId);
+                              }
                            },
                            {
-                              label:'Video',
+                              label:'Default',
                               icon:'pi pi-fw pi-video'
                            },
                         ]
@@ -169,6 +173,13 @@ export default defineComponent({
                         label:'Randomize Order',
                         icon:'pi pi-refresh',
                         command: () => {
+                          emit('randomize:order', paletteId);
+                        }
+                    },
+                      {
+                        label:'Randomize Colors',
+                        icon:'pi-replay',
+                        command: () => {
                           emit('randomize:colors', paletteId);
                         }
                     },
@@ -176,7 +187,7 @@ export default defineComponent({
                         label:'Reverse Order',
                         icon:'pi pi-sort-alpha-up-alt',
                         command: () => {
-                          emit('reverse:colors', paletteId);
+                          emit('reverse:order', paletteId);
                         }
                     },
                        {
@@ -212,7 +223,8 @@ export default defineComponent({
                label:'New',
                icon:'pi pi-fw pi-plus',
                 command: () => {
-
+                  const color = new Color(chroma.random().hex());
+                  store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
                 }
 
             },
@@ -220,14 +232,15 @@ export default defineComponent({
                label:'Duplicate',
                icon:'pi pi-clone',
                 command: () => {
-
+                  const color = new Color(hex.value, stops.value);
+                  store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
                 }
             },
             {
                label:'Randomize',
                icon:'pi pi-refresh',
                 command: () => {
-
+                  value.value = {hex: chroma.random().hex()};
                 }
             },
             {

@@ -135,12 +135,28 @@ export default defineComponent({
       return new Color(color.value, cloneDeep(color.stops));
     }
     const commands = ref({
-      'randomize:colors': () => {
+      'randomize:order': () => {
         shuffleArray(colors.value);
         store.dispatch(Palettes.setColors, {paletteId, colors: colors.value});
       },
-      'reverse:colors': () => {
+      'reverse:order': () => {
         store.dispatch(Palettes.setColors, {paletteId, colors: colors.value.reverse()});
+      },
+      'randomize:colors': async () => {
+        const colors = [...Array(palette.value.colors.length).keys()].map(() => (new Color(chroma.random().hex())));
+        await store.dispatch(Palettes.extendColors, colors);
+        await store.dispatch(Palettes.setColors, {paletteId, colors: []});
+        await store.dispatch(Palettes.setColors, {paletteId, colors});
+      },
+      'new:palette': async () => {
+        const colors = [...Array(8).keys()].map(() => (new Color(chroma.random().hex())))
+        const palette = new Palette(
+          `Palette${store.state.palettes.order.length}.xpalette`,
+          store.state.workspaces.current,
+          colors.map(c => c.id)
+        );
+        await store.dispatch(Palettes.extendColors, colors);
+        await store.dispatch(Palettes.add, palette);
       },
       'clone:palette': () => {
         const colors = palette.value.colors.map(c => new Color(c.value, cloneDeep(c.stops)));

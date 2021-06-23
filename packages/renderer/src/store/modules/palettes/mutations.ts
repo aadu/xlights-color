@@ -22,7 +22,8 @@ export namespace PaletteMutations {
   }
 
   export interface AddColor extends ColorMutation {
-    color: Color
+    color: Color;
+    index?: number;
   }
 
   export interface RemoveColor extends ColorMutation {
@@ -80,7 +81,8 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.ADD_COLOR](state, payload) {
     state.colors[payload.color.id] = payload.color;
-    state.palettes[payload.paletteId].colors.push(payload.color.id)
+    const index = typeof payload.index !== 'undefined' ? payload.index : state.palettes[payload.paletteId].colors.length;
+    state.palettes[payload.paletteId].colors.splice(index, 0, payload.color.id);
   },
   [MutationTypes.EXTEND_COLORS](state, payload) {
     payload.forEach(color => {
