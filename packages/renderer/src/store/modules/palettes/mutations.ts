@@ -67,7 +67,8 @@ export const mutations: MutationTree<State> & Mutations = {
     state.order = payload;
   },
   [MutationTypes.REMOVE](state, payload) {
-    state.order.splice(payload, 1);
+    const index = state.order.findIndex(id => id === payload);
+    state.order.splice(index, 1);
   },
   [MutationTypes.UPDATE_NAME](state, payload) {
     state.palettes[payload.id].filename = payload.name;

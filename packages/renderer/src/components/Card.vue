@@ -1,5 +1,5 @@
 <template>
-<div class="p-d-flex p-ai-center p-m-0 p-p-0">
+<div class="p-d-flex p-ai-center p-m-0 p-p-0 card-container">
   <div class="card-title p-m-0 p-p-0">
     <slot name="title" />
   </div>
@@ -26,9 +26,12 @@ export default defineComponent({
   font-size: 18px;
   font-weight: bold;
   margin-right: 10px;
-  min-width: 200px;
+  min-width: 100px;
 }
 .card-content {
+  min-width: 80%;
+}
+.card-container {
   width: 100%;
 }
 </style>

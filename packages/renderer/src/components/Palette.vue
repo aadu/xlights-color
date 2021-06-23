@@ -4,14 +4,12 @@
       <div class="p-d-flex p-ai-center">
         <Inplace :closable="true" v-model:active="active">
           <template #display>
-              <span class="p-card-title" v-text="name" />
+              <span class="p-card-title p-d-inline-block" v-text="name" style="min-width: 141px;" />
           </template>
           <template #content>
               <InputText v-model="title" autoFocus @keyup.enter="active=false;" />
           </template>
       </Inplace>
-      <p-btn type="button" @click="toggleMenu" icon="pi pi-ellipsis-h" class="p-ml-3 p-button-secondary p-button-text p-button-only" />
-      <Menu ref="menu" class="p-ml-auto" :model="panelOptions" :popup="true"></Menu>
     </div>
     </template>
     <template #content>
@@ -36,6 +34,7 @@
               :paletteId="paletteId"
               :dragging="drag"
               :key="element.id"
+              v-on="commands"
             />
           </div>
         </template>
@@ -52,7 +51,6 @@ import Inplace from 'primevue/inplace';
 import InputText from 'primevue/inputtext';
 import draggable from 'vuedraggable';
 import {Color, Palette} from '/@/store/modules/palettes/index';
-import Menu from 'primevue/menu';
 import ColorCard from './Color.vue';
 import useStore from '/@/store';
 import cloneDeep from 'lodash.clonedeep'
@@ -69,7 +67,7 @@ function shuffleArray(array) {
 
 export default defineComponent({
   name: 'Palette',
-  components: { Card, ColorCard, draggable, Inplace, InputText, Menu },
+  components: { Card, ColorCard, draggable, Inplace, InputText },
   props: {
     paletteId: {
       type: Number,
@@ -84,7 +82,6 @@ export default defineComponent({
     // data
     const drag = ref(false);
     const controlOnStart = ref(true);
-    const menu = ref(null);
     const active = ref(false);
 
     // computed
@@ -137,85 +134,51 @@ export default defineComponent({
       const color = store.state.palettes.colors[id];
       return new Color(color.value, cloneDeep(color.stops));
     }
-
-    const panelOptions = ref([
-        {
-            label: 'Save',
-            icon: 'pi pi-save',
-            command: () => {
-
-            }
-        },
-        {
-            label: 'Random Order',
-            icon: 'pi pi-refresh',
-            command: () => {
-              shuffleArray(colors.value);
-              store.dispatch(Palettes.setColors, {paletteId, colors: colors.value});
-            }
-        },
-        {
-            label: 'Reverse Order',
-            icon: 'pi pi-sort-alpha-up-alt',
-            command: () => {
-              store.dispatch(Palettes.setColors, {paletteId, colors: colors.value.reverse()});
-            }
-        },
-              {
-            label: 'Clone',
-            icon: 'pi pi-clone',
-            command: () => {
-              const colors = palette.value.colors.map(c => new Color(c.value, cloneDeep(c.stops)));
-              const clone = new Palette(
-                palette.value.filename.replace('.xpalette', '-copy.xpalette'),
-                palette.value.dirname,
-                colors.map(c => c.id)
-              );
-              store.dispatch(Palettes.extendColors, colors);
-              store.dispatch(Palettes.add, clone);
-            }
-        },
-        {   label: 'Download',
-            icon: 'pi pi-download',
-            command: () => {
-              const blob = new Blob([xPalette.value], {type: 'text/plain'});
-              const elem = window.document.createElement('a');
-              elem.href = window.URL.createObjectURL(blob);
-              elem.download = palette.filename;
-              document.body.appendChild(elem);
-              elem.click();
-              document.body.removeChild(elem);
-          }
-        },
-          {
-            label: 'Delete',
-            icon: 'pi pi-times',
-            command: () => {
-              store.dispatch(Palettes.remove, palette.filename);
-            }
-        }
-
-    ]);
-    function toggleMenu(event) {
-      if (menu.value) {
-        menu.value.toggle(event);
+    const commands = ref({
+      'randomize:colors': () => {
+        shuffleArray(colors.value);
+        store.dispatch(Palettes.setColors, {paletteId, colors: colors.value});
+      },
+      'reverse:colors': () => {
+        store.dispatch(Palettes.setColors, {paletteId, colors: colors.value.reverse()});
+      },
+      'clone:palette': () => {
+        const colors = palette.value.colors.map(c => new Color(c.value, cloneDeep(c.stops)));
+        const clone = new Palette(
+          palette.value.filename.replace('.xpalette', '-copy.xpalette'),
+          palette.value.dirname,
+          colors.map(c => c.id)
+        );
+        store.dispatch(Palettes.extendColors, colors);
+        store.dispatch(Palettes.add, clone);
+      },
+      'download:palette': () => {
+        const blob = new Blob([xPalette.value], {type: 'text/plain'});
+        const elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = palette.value.filename;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+      },
+      'delete:palette': () => {
+        store.dispatch(Palettes.remove, paletteId);
       }
-    }
+    });
+
 
     return {
       active,
       addColor,
       clone,
       colors,
+      commands,
       drag,
-      menu,
       name,
       paletteId,
-      panelOptions,
       pullFunction,
       start,
       title,
-      toggleMenu,
       xPalette,
    };
   },

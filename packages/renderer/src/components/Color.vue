@@ -70,6 +70,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['randomize:colors', 'reverse:colors', 'delete:palette', 'download:palette', 'clone:palette'],
   setup ({ paletteId, id, dragging: isDragging}, { emit }) {
     // data
     const dragging = ref(isDragging);
@@ -140,7 +141,7 @@ export default defineComponent({
     };
     const contextItems = ref([
             {
-               label:'File',
+               label:'Palette',
                icon:'pi pi-fw pi-file',
                items:[
                     {
@@ -158,17 +159,76 @@ export default defineComponent({
                         ]
                     },
                     {
-                        label:'Delete',
-                        icon:'pi pi-fw pi-trash'
+                        label:'Clone',
+                        icon:'pi pi-clone',
+                        command: () => {
+                          emit('clone:palette', paletteId);
+                        }
                     },
                     {
+                        label:'Randomize Order',
+                        icon:'pi pi-refresh',
+                        command: () => {
+                          emit('randomize:colors', paletteId);
+                        }
+                    },
+                    {
+                        label:'Reverse Order',
+                        icon:'pi pi-sort-alpha-up-alt',
+                        command: () => {
+                          emit('reverse:colors', paletteId);
+                        }
+                    },
+                       {
                        separator:true
+                    },
+                      {
+                        label:'Delete',
+                        icon:'pi pi-fw pi-trash',
+                        command: () => {
+                          emit('delete:palette', paletteId);
+                        }
                     },
                     {
                        label:'Export',
-                       icon:'pi pi-fw pi-external-link'
+                       icon:'pi pi-fw pi-external-link',
+                       command: () => {
+                          emit('download:palette', paletteId);
+                        }
+                    },
+                    {
+                      label: 'Save',
+                      icon: 'pi pi-fw pi-save',
+                      command: () => {
+                        emit('save:palette', paletteId);
+                      }
                     }
                 ]
+            },
+            {
+               separator:true
+            },
+            {
+               label:'New',
+               icon:'pi pi-fw pi-plus',
+                command: () => {
+
+                }
+
+            },
+            {
+               label:'Duplicate',
+               icon:'pi pi-clone',
+                command: () => {
+
+                }
+            },
+            {
+               label:'Randomize',
+               icon:'pi pi-refresh',
+                command: () => {
+
+                }
             },
             {
                separator:true
