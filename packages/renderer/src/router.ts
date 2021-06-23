@@ -1,8 +1,8 @@
 import {createRouter, createWebHashHistory} from 'vue-router';
-import Palettes from './components/PaletteContainer.vue';
+import Main from './components/Main.vue';
 
 const routes = [
-  {path: '/', name: 'Palettes', component: Palettes},
+  {path: '/', name: 'Main', component: Main},
   {path: '/about', name: 'About', component: () => import('/@/components/About.vue')}, // Lazy load route component
 ];
 
