@@ -22,4 +22,8 @@ export class Palette {
     this.dirname = dirname;
     this.colors = colors;
   }
+
+  toXPalette(colors: Array<Color>) {
+    return `${this.colors.map(id => colors[id].toXPalette()).join(',')},`;
+  }
 }

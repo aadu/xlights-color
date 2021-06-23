@@ -1,27 +1,16 @@
 <template>
   <div
     id="content-wrapper"
-    class="p-m-0 p-p-0 p-col p-nogutter"
-  >
-    <top-bar />
-    <div
-      id="content"
-      class="p-m-0 p-p-0"
-    >
+    class="p-m-0 p-p-3">
       <router-view />
-    </div>
   </div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import TopBar from '/@/components/TopBar.vue';
 
 export default defineComponent({
   name: 'App',
-  components: {
-    TopBar,
-  },
 });
 </script>
 

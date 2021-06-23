@@ -2,7 +2,7 @@
   <main id="palettes-wrapper">
     <DataView :value="palettes" layout="list">
       <template #header>
-          Palettes
+          <TopBar />
       </template>
       <template #list="slotProps">
         <palette-card
@@ -15,11 +15,20 @@
         <p-btn icon="pi pi-plus-circle" class="p-ml-2 p-my-2" label="Add Palette" @click="addNewPalette"></p-btn>
       </template>
     </DataView>
+    <Card>
+      <template #content>
+        <div v-for="(palette, i) in palettes" :key="i">
+          <h4>{{ palette.filename }}</h4>
+          <code>{{ xPalette(palette.id) }}</code>
+        </div>
+    </template>
+    </Card>
   </main>
 </template>
 
 <script lang="ts">
 import {defineComponent, computed, reactive, watchEffect, watch} from 'vue';
+import Card from 'primevue/card';
 import useStore from '/@/store';
 import chroma from 'chroma-js';
 import DataView from 'primevue/dataview';
@@ -28,12 +37,13 @@ import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
 import { ActionTypes as Palettes, Color, Palette } from '/@/store/modules/palettes/index';
 import GradientPicker from './GradientPicker.vue';
+import TopBar from '/@/components/TopBar.vue';
 
 
 
 export default defineComponent({
   name: 'Palettes',
-  components: { PaletteCard, GradientPicker, DataView },
+  components: { PaletteCard, GradientPicker, DataView, Card, TopBar },
   setup () {
     const store = useStore();
     const electron = useElectron();
@@ -72,7 +82,11 @@ export default defineComponent({
       await store.dispatch(Palettes.add, palette);
     }
 
-    return { palettes, currentWorkspace, addNewPalette };
+    function xPalette(id: number) {
+      return store.getters.xPalette(id);
+    }
+
+    return { palettes, currentWorkspace, addNewPalette, xPalette };
 
   },
 });

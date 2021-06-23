@@ -1,7 +1,7 @@
 # xLights Color Palette Editor
 ## Roadmap
-- [ ] Add new colors
-- [ ] Delete colors
+- [x] Add new colors
+- [x] Delete colors
 - [x] Clone Palette
 - [x] Add Palette
 - [x] Delete Palette
@@ -15,7 +15,7 @@
 - [ ] Sort Palettes
 - [ ] Filter Palettes
 - [ ] Create Palette Backup
-- [ ] Randomize color
+- [x] Randomize color
 - [ ] Darken/Lighten color
 - [ ] Mix/blend colors
 - [ ] Interprolate Colors

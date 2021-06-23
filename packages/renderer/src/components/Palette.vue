@@ -4,10 +4,10 @@
       <div class="p-d-flex p-ai-center">
         <Inplace :closable="true" v-model:active="active">
           <template #display>
-              <span class="p-card-title p-d-inline-block" v-text="name" style="min-width: 141px;" />
+            <span class="p-card-title p-d-inline-block p-ml-2" v-text="name" style="min-width: 141px;" />
           </template>
           <template #content>
-              <InputText v-model="title" autoFocus @keyup.enter="active=false;" />
+            <InputText v-model="title" autoFocus @keyup.enter="active=false;" />
           </template>
       </Inplace>
     </div>
