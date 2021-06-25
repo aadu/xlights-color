@@ -5,6 +5,6 @@ services:
     volumes:
       - "$PWD:/project"
       # - "node_modules:/project/node_modules"
-    command: yarn dist
+    command: yarn compile && yarn dist
 volumes:
   node_modules:
