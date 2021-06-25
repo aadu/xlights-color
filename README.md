@@ -19,8 +19,8 @@
 - [x] Help section
 - [x] Auto-save name changes, delete previous file
 - [x] Save all palettes
-- [ ] Darken/Lighten color
-- [ ] Mix/blend colors
-- [ ] Interprolate Colors
+- [x] Darken/Lighten color
+- [x] Mix/blend colors
+- [x] Interprolate Colors
 - [ ] Persistent State
 - [ ] Config File
