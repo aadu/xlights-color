@@ -45,7 +45,8 @@
     <Fieldset legend="Save">
       Right-click on a color to access that Palette's context menu
     </Fieldset>
-    <p>&copy; Aaron Duke 2021</p>
+    <p style="font-size: 12px; margin-bottom: -8px;">&copy;2021, Aaron Duke</p>
+    <p style="font-size: 12px;">dukuru@gmail.com</p>
   </Dialog>
 </template>
 

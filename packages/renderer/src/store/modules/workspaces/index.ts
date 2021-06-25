@@ -17,7 +17,7 @@ export interface State {
 }
 
 const state: State = {
-  current: '/root/xlights-color/palettes',
+  current: '',
 };
 
 const workspaces: Module<State, RootState> = {
