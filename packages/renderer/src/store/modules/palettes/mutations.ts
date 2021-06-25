@@ -62,16 +62,22 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.ADD](state, payload) {
     state.order.push(payload.id);
-    state.palettes[payload.id] = { ...payload };
+    state.filenames.push(payload.filename);
+    state.palettes[payload.id] = payload;
   },
   [MutationTypes.SET](state, payload) {
     state.order = payload;
   },
   [MutationTypes.REMOVE](state, payload) {
     const index = state.order.findIndex(id => id === payload);
+    const palette = state.palettes[payload];
+    state.filenames = state.filenames.filter(_ => _ !== palette.filename);
     state.order.splice(index, 1);
   },
   [MutationTypes.UPDATE_NAME](state, payload) {
+    const oldName = state.palettes[payload.id].filename;
+    const index = state.filenames.findIndex(id => id === oldName);
+    state.filenames[index] = payload.name;
     state.palettes[payload.id].filename = payload.name;
   },
   [MutationTypes.CLEAR](state) {

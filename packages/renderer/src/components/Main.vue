@@ -60,6 +60,13 @@
           label="Add Palette"
           @click="addNewPalette"
         />
+      <p-btn
+          icon="pi pi-save"
+          class="p-ml-2 p-my-2"
+          label="Save All"
+          @click="savePalettes"
+        />
+        <NewPalette ref="newpalette" @new:palette="onAddNewPalette" />
       </template>
     </DataView>
     <Card v-if="debug">
@@ -87,6 +94,7 @@ import InputText from 'primevue/inputtext';
 import { parsePalette } from '/@/store/modules/palettes/palette';
 import {useElectron} from '/@/use/electron';
 import PaletteCard from './Palette.vue';
+import NewPalette from './New.vue';
 import { ActionTypes as Palettes, Color, Palette } from '/@/store/modules/palettes/index';
 import GradientPicker from './GradientPicker.vue';
 import TopBar from '/@/components/TopBar.vue';
@@ -94,11 +102,12 @@ import TopBar from '/@/components/TopBar.vue';
 
 export default defineComponent({
   name: 'Palettes',
-  components: { PaletteCard, GradientPicker, DataView, Card, TopBar, Dropdown, InputText },
+  components: { PaletteCard, GradientPicker, DataView, Card, TopBar, Dropdown, InputText, NewPalette},
   setup () {
     const store = useStore();
     const electron = useElectron();
     const debug = ref(false);
+    const newpalette = ref(null);
 
     async function addPalette(filename: string, dirname: string) {
         const content = (await electron.readFile(`${dirname}/${filename}`, {encoding: 'utf-8'}));
@@ -133,15 +142,15 @@ export default defineComponent({
         return exists;
     }
 
-    async function makeBackup(paletteId: number) {
+    async function makeBackup(paletteId: number, filename: string): void {
       const palette = store.getters.palette(paletteId);
-      const path = `${palette.dirname}/${palette.filename}`;
-        const backupPath = `${palette.dirname}/.backup/${new Date().getTime().toString()}-${palette.filename}`;
-        const doesExist = await exists(path);
-        if (doesExist) {
-          await electron.mkdir(`${palette.dirname}/.backup`, {recursive: true});
-          await electron.copyFile(path, backupPath);
-        }
+      const path = `${palette.dirname}/${filename ? filename : palette.filename}`;
+      const backupPath = `${palette.dirname}/.backup/${new Date().getTime().toString()}-${palette.filename}`;
+      const doesExist = await exists(path);
+      if (doesExist) {
+        await electron.mkdir(`${palette.dirname}/.backup`, {recursive: true});
+        await electron.copyFile(path, backupPath);
+      }
     }
 
     const commands = reactive({
@@ -151,6 +160,16 @@ export default defineComponent({
         const path = `${palette.dirname}/${palette.filename}`;
         await makeBackup(paletteId);
         await electron.writeFile(path, xPalette);
+      },
+      'rename:palette': async ({paletteId, oldName}) => {
+        const palette = store.getters.palette(paletteId);
+        const oldPath = `${palette.dirname}/${oldName}`;
+        const newPath = `${palette.dirname}/${palette.filename}`;
+        const doesExist = await exists(oldPath);
+        if (doesExist) {
+          await makeBackup(paletteId, oldName);
+          await electron.rename(oldPath, newPath);
+        }
       },
       'delete:palette': async (paletteId: number) => {
         const palette = store.getters.palette(paletteId);
@@ -167,16 +186,23 @@ export default defineComponent({
         await readDirectory(currentWorkspace.value);
       });
 
-    async function addNewPalette() {
-      const colors = [...Array(8).keys()].map(() => (new Color(chroma.random().hex())));
+    function addNewPalette() {
+      if (newpalette.value) {
+        newpalette.value.openDialog();
+      }
+    };
+
+    async function onAddNewPalette(event) {
+      const filename = event.filename ? `${event.filename}.xpalette` : `Palette${palettes.value.length}.xpalette`;
+      const colors = event.colors.map(c => new Color(c));
       const palette = new Palette(
-        `Palette${palettes.value.length}.xpalette`,
+        filename,
         currentWorkspace.value,
         colors.map(c => c.id),
       );
       await store.dispatch(Palettes.extendColors, colors);
       await store.dispatch(Palettes.add, palette);
-    }
+     };
 
     function xPalette(id: number) {
       return store.getters.xPalette(id);
@@ -205,7 +231,12 @@ export default defineComponent({
           }
       };
 
-    return { palettes, currentWorkspace, addNewPalette, xPalette, commands, sortOptions, onSortChange, sortKey, sortOrder, sortField, searchText, debug};
+    async function savePalettes() {
+      const save = commands['save:palette'];
+      const promises = palettes.value.map((palette) => save(palette.id));
+      Promise.all(promises);
+    };
+    return {newpalette, onAddNewPalette, savePalettes, palettes, currentWorkspace, addNewPalette, xPalette, commands, sortOptions, onSortChange, sortKey, sortOrder, sortField, searchText, debug};
 
   },
 });

@@ -1,5 +1,5 @@
 import {contextBridge, remote} from 'electron';
-import { readdir, readFile, writeFile, copyFile, mkdir, stat, rm } from 'fs/promises';
+import { readdir, readFile, writeFile, copyFile, mkdir, stat, rm, rename } from 'fs/promises';
 
 const apiKey = 'electron';
 /**
@@ -15,6 +15,7 @@ const api: ElectronApi = {
   mkdir,
   stat,
   rm,
+  rename,
 };
 
 if (import.meta.env.MODE !== 'test') {

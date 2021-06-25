@@ -257,6 +257,20 @@ export default defineComponent({
                   value.value = {hex: chroma.random().hex()};
                 },
             },
+              {
+               label:'Brighten',
+               icon:'pi pi-chevron-up',
+                command: () => {
+                  value.value = {hex: chroma(unref(hex)).brighten().hex()};
+                },
+            },
+            {
+               label:'Darken',
+               icon:'pi pi-chevron-down',
+                command: () => {
+                  value.value = {hex: chroma(unref(hex)).darken().hex()};
+                },
+            },
             {
                separator:true,
             },

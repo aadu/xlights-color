@@ -10,7 +10,7 @@
             <span
               class="p-card-title p-d-inline-block p-ml-2"
               style="min-width: 141px;"
-              v-text="name"
+              v-text="name || 'blank'"
             />
           </template>
           <template #content>
@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed, reactive, ref, unref, watchEffect} from 'vue';
+import {defineComponent, computed, ref, watch} from 'vue';
 import chroma from 'chroma-js';
 import Card from './Card.vue';
 import Inplace from 'primevue/inplace';
@@ -89,7 +89,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['save:palette', 'delete:palette'],
+  emits: ['save:palette', 'delete:palette', 'rename:palette'],
   setup ({ paletteId }, { emit }) {
     // data
     const drag = ref(false);
@@ -101,14 +101,24 @@ export default defineComponent({
     const palette = computed(() => {
       return store.getters.palette(paletteId);
     });
+    const filenames = computed(() => {
+      return store.getters.filenames;
+    })
     const name = computed(() => palette.value.filename.split('.')[0]);
         const title = computed({
       get() {
         return name.value;
       },
       set(name: string) {
-        store.dispatch(Palettes.updateName, {name: `${name}.xpalette`, id: paletteId});
+          let newName = `${name}.xpalette`;
+          while (filenames.value.includes(newName)) {
+            newName = `_${newName}`;
+          };
+        store.dispatch(Palettes.updateName, {name: newName, id: paletteId});
       },
+    });
+    watch(name, (name, oldName) => {
+      emit('rename:palette', {paletteId, name: `${name}.xpalette`, oldName: `${oldName}.xpalette`});
     });
     const colors = computed({
       get(){

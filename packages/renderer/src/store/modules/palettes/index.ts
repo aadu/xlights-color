@@ -21,12 +21,14 @@ export interface State {
   order: Array<number>;
   palettes: Record<number, Palette>;
   colors: Record<number, Color>;
+  filenames: Array<string>;
 }
 
 const state: State = {
   order: [],
   palettes: {},
   colors: {},
+  filenames: [],
 };
 
 const palettes: Module<State, RootState> = {

@@ -9,6 +9,7 @@ interface PaletteDetail extends Omit<Palette, 'colors'> {
 
 export type Getters<S = State> = {
   palettes(state: S): Array<Palette>;
+  filenames(state: S): Array<string>;
   palette(state: S): (id: number) => PaletteDetail;
   xPalette(state: S): (id: number) => string;
 };
@@ -22,6 +23,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return (id) => {
       return {...state.palettes[id], colors: state.palettes[id].colors.map(colorId => state.colors[colorId])};
     };
+  },
+  filenames: (state) => {
+    return state.filenames;
   },
   xPalette: (state) => {
     return (id) => {

@@ -17,6 +17,8 @@
 - [x] Sort Palettes
 - [x] Filter Palettes
 - [x] Help section
+- [x] Auto-save name changes, delete previous file
+- [x] Save all palettes
 - [ ] Darken/Lighten color
 - [ ] Mix/blend colors
 - [ ] Interprolate Colors
