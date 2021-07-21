@@ -6,80 +6,132 @@
     :dismissable-mask="true"
     :modal="true"
   >
-  <div class="p-grid p-fluid">
-    <div class="p-col-8">
+    <div class="p-grid p-fluid">
+      <div class="p-col-8">
         <div class="p-inputgroup">
-            <span class="p-inputgroup-addon">
-                <i class="pi pi-file-o"></i>
-            </span>
-            <InputText type="text" v-model="name" placeholder="Palette Name" />
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-file-o" />
+          </span>
+          <InputText
+            v-model="name"
+            type="text"
+            placeholder="Palette Name"
+          />
         </div>
-    </div>
-    <div class="p-col">
-      Number of non-default colors
-      <InputNumber v-model="numColors" mode="decimal" showButtons buttonLayout="horizontal" :min="0" :max="8" :step="1"
-        decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
-
-    </div>
-    <div class="p-col-12">
-      <h4>Type</h4>
-      <SelectButton v-model="mode" :options="options" >
-            </SelectButton>
-      <Divider type="dashed"/>
-    </div>
-    <div class="p-col-12">
-      <Fieldset legend="Color Scale" v-if="mode === 'Scale'">
-        <div class="p-grid p-jc-between">
-          <div class="p-col-4">
-            <div class="p-grid p-jc-start">
-          <ColorPicker v-model="color1" />
+      </div>
+      <div class="p-col">
+        Number of non-default colors
+        <InputNumber
+          v-model="numColors"
+          mode="decimal"
+          show-buttons
+          button-layout="horizontal"
+          :min="0"
+          :max="8"
+          :step="1"
+          decrement-button-class="p-button-secondary"
+          increment-button-class="p-button-secondary"
+          increment-button-icon="pi pi-plus"
+          decrement-button-icon="pi pi-minus"
+        />
+      </div>
+      <div class="p-col-12">
+        <h4>Type</h4>
+        <SelectButton
+          v-model="mode"
+          :options="options"
+        />
+        <Divider type="dashed" />
+      </div>
+      <div class="p-col-12">
+        <Fieldset
+          v-if="mode === 'Scale'"
+          legend="Color Scale"
+        >
+          <div class="p-grid p-jc-between">
+            <div class="p-col-4">
+              <div class="p-grid p-jc-start">
+                <ColorPicker v-model="color1" />
+              </div>
+            </div>
+            <div class="p-col-4">
+              <div class="p-grid p-jc-end">
+                <ColorPicker v-model="color2" />
+              </div>
+            </div>
           </div>
-          </div>
-          <div class="p-col-4">
-            <div class="p-grid p-jc-end">
-          <ColorPicker v-model="color2" />
-          </div>
-          </div>
-          </div>
-
-    </Fieldset>
-    <Fieldset legend="Brewer" v-if="mode === 'Brewer'">
-        <Dropdown v-model="brewerValue" :options="brewerOptions" optionLabel="name" placeholder="Select Scale" style="width: 300px;">
-                    <template #value="slotProps">
-                <div v-if="slotProps.value">
-                    <div class="p-d-flex">
-                      <div class="p-mr-2">{{slotProps.value.name}}</div>
-                      <div class="select-color-box" :style="style(color)" v-for="(color, i) in getBrewerColors(slotProps.value.name)" :key="i" />
+        </Fieldset>
+        <Fieldset
+          v-if="mode === 'Brewer'"
+          legend="Brewer"
+        >
+          <Dropdown
+            v-model="brewerValue"
+            :options="brewerOptions"
+            option-label="name"
+            placeholder="Select Scale"
+            style="width: 300px;"
+          >
+            <template #value="slotProps">
+              <div v-if="slotProps.value">
+                <div class="p-d-flex">
+                  <div class="p-mr-2">
+                    {{ slotProps.value.name }}
                   </div>
+                  <div
+                    v-for="(color, i) in getBrewerColors(slotProps.value.name)"
+                    :key="i"
+                    class="select-color-box"
+                    :style="style(color)"
+                  />
                 </div>
-                <span v-else>
-                    {{slotProps.placeholder}}
-                </span>
+              </div>
+              <span v-else>
+                {{ slotProps.placeholder }}
+              </span>
             </template>
             <template #option="slotProps">
               <div class="p-d-flex">
-                      <div class="p-mr-2" style="width: 80px;">{{slotProps.option.name}}</div>
-                      <div class="select-color-box" :style="style(color)" v-for="(color, i) in getBrewerColors(slotProps.option.name)" :key="i" />
-                  </div>
+                <div
+                  class="p-mr-2"
+                  style="width: 80px;"
+                >
+                  {{ slotProps.option.name }}
+                </div>
+                <div
+                  v-for="(color, i) in getBrewerColors(slotProps.option.name)"
+                  :key="i"
+                  class="select-color-box"
+                  :style="style(color)"
+                />
+              </div>
             </template>
-      </Dropdown>
-    </Fieldset>
-
-  </div>
-  <div class="p-col-12">
-    <div class="p-grid p-jc-between">
-      <div class="p-col" v-for="(color, i) in colors" :key="i">
-        <div class="color-box" :style="style(color)">
-          <span class="color-box-color-name">{{ color }}</span>
+          </Dropdown>
+        </Fieldset>
+      </div>
+      <div class="p-col-12">
+        <div class="p-grid p-jc-between">
+          <div
+            v-for="(color, i) in colors"
+            :key="i"
+            class="p-col"
+          >
+            <div
+              class="color-box"
+              :style="style(color)"
+            >
+              <span class="color-box-color-name">{{ color }}</span>
+            </div>
+          </div>
         </div>
       </div>
+      <div class="p-col-2 p-offset-10">
+        <p-btn
+          label="Submit"
+          @click="submit"
+        />
+      </div>
     </div>
-  </div>
-  <div class="p-col-2 p-offset-10">
-    <p-btn label="Submit" @click="submit">
-    </p-btn>
-    </div>
-  </div>
   </Dialog>
 </template>
 
@@ -120,7 +172,7 @@ export default defineComponent({
     });
 
     function style(color) {
-      return {'background': color}
+      return {'background': color};
     }
 
     function openDialog() {
@@ -136,11 +188,11 @@ export default defineComponent({
       '#FFFF00',
       '#00FFFF',
       '#FF00FF',
-    ]
+    ];
     const brewerOptions = ref(
       Object.keys(brewer).map(name => {
-        return {name}
-      })
+        return {name};
+      }),
     );
 
     const brewerValue = ref();
@@ -148,7 +200,7 @@ export default defineComponent({
     function getBrewerColors(name: string) {
       const index = Math.max(3, unref(numColors));
       const colors = brewer[name][index];
-      return colors
+      return colors;
     }
     const colors = computed(() => {
       let scaleColors = [];
@@ -180,7 +232,7 @@ export default defineComponent({
       emit('new:palette', {
         filename: unref(name),
         colors: unref(colors),
-      })
+      });
       dialog.value = false;
       name.value = '';
     }

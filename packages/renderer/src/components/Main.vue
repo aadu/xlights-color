@@ -60,7 +60,7 @@
           label="Add Palette"
           @click="addNewPalette"
         />
-      <p-btn
+        <p-btn
           icon="pi pi-save"
           class="p-ml-2 p-my-2"
           label="Save All"
@@ -78,7 +78,10 @@
           label="Reload"
           @click="refresh"
         />
-        <NewPalette ref="newpalette" @new:palette="onAddNewPalette" />
+        <NewPalette
+          ref="newpalette"
+          @new:palette="onAddNewPalette"
+        />
       </template>
     </DataView>
     <Card v-if="debug">
@@ -202,7 +205,7 @@ export default defineComponent({
       if (newpalette.value) {
         newpalette.value.openDialog();
       }
-    };
+    }
 
     async function onAddNewPalette(event) {
       const filename = event.filename ? `${event.filename}.xpalette` : `Palette${palettes.value.length}.xpalette`;
@@ -214,7 +217,7 @@ export default defineComponent({
       );
       await store.dispatch(Palettes.extendColors, colors);
       await store.dispatch(Palettes.add, palette);
-     };
+     }
 
     function xPalette(id: number) {
       return store.getters.xPalette(id);
@@ -247,14 +250,14 @@ export default defineComponent({
       const save = commands['save:palette'];
       const promises = palettes.value.map((palette) => save(palette.id));
       Promise.all(promises);
-    };
+    }
     async function clear() {
       await store.dispatch(Palettes.clear);
-    };
+    }
     async function refresh() {
       await store.dispatch(Palettes.clear);
       await readDirectory(currentWorkspace.value);
-    };
+    }
     return {refresh, clear, newpalette, onAddNewPalette, savePalettes, palettes, currentWorkspace, addNewPalette, xPalette, commands, sortOptions, onSortChange, sortKey, sortOrder, sortField, searchText, debug};
 
   },

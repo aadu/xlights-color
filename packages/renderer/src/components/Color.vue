@@ -26,7 +26,7 @@
           style="stroke:rgb(255,0,0);stroke-width:2"
         />
       </svg>
-        <svg
+      <svg
         v-if="highlight"
         class="overlay"
         width="150"
@@ -122,7 +122,7 @@ export default defineComponent({
       if (cm.value) {
         return cm.value.visible;
       }
-    })
+    });
 
     const style = computed(() => {
       return {
@@ -230,7 +230,7 @@ export default defineComponent({
                 },
 
             },
-              ]
+              ],
             },
                         {
                separator:true,

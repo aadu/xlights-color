@@ -1,5 +1,7 @@
 <template>
-  <Card class="p-mb-2 p-py-0 p-mx-2 palette" :class="{'active-palette': highlight}"
+  <Card
+    class="p-mb-2 p-py-0 p-mx-2 palette"
+    :class="{'active-palette': highlight}"
   >
     <template #title>
       <div class="p-d-flex p-ai-center">
@@ -105,7 +107,7 @@ export default defineComponent({
     });
     const filenames = computed(() => {
       return store.getters.filenames;
-    })
+    });
     const name = computed(() => palette.value.filename.split('.')[0]);
         const title = computed({
       get() {
@@ -115,7 +117,7 @@ export default defineComponent({
           let newName = `${name}.xpalette`;
           while (filenames.value.includes(newName)) {
             newName = `_${newName}`;
-          };
+          }
         store.dispatch(Palettes.updateName, {name: newName, id: paletteId});
       },
     });
