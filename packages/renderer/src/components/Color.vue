@@ -26,6 +26,19 @@
           style="stroke:rgb(255,0,0);stroke-width:2"
         />
       </svg>
+        <svg
+        v-if="highlight"
+        class="overlay"
+        width="150"
+        height="83"
+      >
+        <rect
+          width="150"
+          height="83"
+          fill-opacity="0.0"
+          style="stroke:rgb(255,255,0);stroke-width:4"
+        />
+      </svg>
     </template>
   </Card>
   <ContextMenu
@@ -88,7 +101,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['randomize:colors', 'reverse:order', 'delete:palette', 'download:palette', 'clone:palette', 'randomize:order', 'new:palette', 'save:palette'],
+  emits: ['highlight', 'randomize:colors', 'reverse:order', 'delete:palette', 'download:palette', 'clone:palette', 'randomize:order', 'new:palette', 'save:palette'],
   setup (props, { emit }) {
     const { paletteId, id, dragging: isDragging} = props;
     // data
@@ -105,6 +118,11 @@ export default defineComponent({
     const ignoreStops = ref(false);
     const op = ref(null);
     const cm = ref(null);
+    const visible = computed(() => {
+      if (cm.value) {
+        return cm.value.visible;
+      }
+    })
 
     const style = computed(() => {
       return {
@@ -160,21 +178,74 @@ export default defineComponent({
     }
     const contextItems = ref([
             {
+              label: 'Color',
+              icon: 'pi pi-fw pi-circle-on',
+              items: [
+            {
+               label:'New',
+               icon:'pi pi-fw pi-plus',
+                command: () => {
+                  const color = new Color(chroma.random().hex());
+                  store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
+                },
+
+            },
+            {
+               label:'Duplicate',
+               icon:'pi pi-clone',
+                command: () => {
+                  const color = new Color(hex.value, stops.value);
+                  store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
+                },
+            },
+            {
+               label:'Randomize',
+               icon:'pi pi-refresh',
+                command: () => {
+                  value.value = {hex: chroma.random().hex()};
+                },
+            },
+              {
+               label:'Brighten',
+               icon:'pi pi-chevron-up',
+                command: () => {
+                  value.value = {hex: chroma(unref(hex)).brighten().hex()};
+                },
+            },
+            {
+               label:'Darken',
+               icon:'pi pi-chevron-down',
+                command: () => {
+                  value.value = {hex: chroma(unref(hex)).darken().hex()};
+                },
+            },
+            {
+               separator:true,
+            },
+            {
+               label:'Delete',
+               icon:'pi pi-fw pi-trash',
+                command: () => {
+                  store.dispatch(Palettes.removeColor, {paletteId, id});
+                },
+
+            },
+              ]
+            },
+                        {
+               separator:true,
+            },
+
+                        {
                label:'Palette',
-               icon:'pi pi-fw pi-file',
+               icon:'pi pi-fw pi-th-large',
                items:[
                     {
                         label:'New',
-                        icon:'pi pi-fw pi-plus',
-                        items:[
-                           {
-                              label:'Random',
-                              icon:'pi pi-fw pi-plus-circle',
-                              command: () => {
-                                emit('new:palette', paletteId);
-                              },
-                           },
-                        ],
+                      icon:'pi pi-fw pi-plus',
+                            command: () => {
+                              emit('new:palette', paletteId);
+                            },
                     },
                     {
                         label:'Clone',
@@ -230,64 +301,16 @@ export default defineComponent({
                     },
                 ],
             },
-            {
-               separator:true,
-            },
-            {
-               label:'New',
-               icon:'pi pi-fw pi-plus',
-                command: () => {
-                  const color = new Color(chroma.random().hex());
-                  store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
-                },
-
-            },
-            {
-               label:'Duplicate',
-               icon:'pi pi-clone',
-                command: () => {
-                  const color = new Color(hex.value, stops.value);
-                  store.dispatch(Palettes.addColor, {paletteId, color, index: props.index + 1});
-                },
-            },
-            {
-               label:'Randomize',
-               icon:'pi pi-refresh',
-                command: () => {
-                  value.value = {hex: chroma.random().hex()};
-                },
-            },
-              {
-               label:'Brighten',
-               icon:'pi pi-chevron-up',
-                command: () => {
-                  value.value = {hex: chroma(unref(hex)).brighten().hex()};
-                },
-            },
-            {
-               label:'Darken',
-               icon:'pi pi-chevron-down',
-                command: () => {
-                  value.value = {hex: chroma(unref(hex)).darken().hex()};
-                },
-            },
-            {
-               separator:true,
-            },
-            {
-               label:'Delete',
-               icon:'pi pi-fw pi-trash',
-                command: () => {
-                  store.dispatch(Palettes.removeColor, {paletteId, id});
-                },
-
-            },
         ]);
 
+    const highlight = ref(false);
     function onContextMenu(event){
       if (cm.value) {
         emitter.emit('contextmenu');
         cm.value.show(event);
+        setTimeout(() => {
+          highlight.value = true;
+        }, 250);
       }
     }
     emitter.on('contextmenu', () => {
@@ -295,8 +318,19 @@ export default defineComponent({
         cm.value.hide();
       }
     });
+    watch(visible, (menu, old) => {
+      if (!menu && menu !== old) {
+        highlight.value = false;
+      }
+    });
+    watch(highlight, (value, old) => {
+      if (value !== old) {
+        emit('highlight', value);
+      }
+    });
   return {
     cm,
+    highlight,
     contextItems,
     gradient,
     hex,

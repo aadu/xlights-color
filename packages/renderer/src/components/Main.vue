@@ -66,6 +66,18 @@
           label="Save All"
           @click="savePalettes"
         />
+        <p-btn
+          icon="pi pi-exclamation-triangle"
+          class="p-ml-2 p-my-2"
+          label="Clear All"
+          @click="clear"
+        />
+        <p-btn
+          icon="pi pi-refresh"
+          class="p-ml-2 p-my-2"
+          label="Reload"
+          @click="refresh"
+        />
         <NewPalette ref="newpalette" @new:palette="onAddNewPalette" />
       </template>
     </DataView>
@@ -145,7 +157,7 @@ export default defineComponent({
     async function makeBackup(paletteId: number, filename: string): void {
       const palette = store.getters.palette(paletteId);
       const path = `${palette.dirname}/${filename ? filename : palette.filename}`;
-      const backupPath = `${palette.dirname}/.backup/${new Date().getTime().toString()}-${palette.filename}`;
+      const backupPath = `${palette.dirname}/.backup/${palette.filename.replace('.xpalette', '')}.${new Date().getTime().toString()}.xcolor`;
       const doesExist = await exists(path);
       if (doesExist) {
         await electron.mkdir(`${palette.dirname}/.backup`, {recursive: true});
@@ -236,7 +248,14 @@ export default defineComponent({
       const promises = palettes.value.map((palette) => save(palette.id));
       Promise.all(promises);
     };
-    return {newpalette, onAddNewPalette, savePalettes, palettes, currentWorkspace, addNewPalette, xPalette, commands, sortOptions, onSortChange, sortKey, sortOrder, sortField, searchText, debug};
+    async function clear() {
+      await store.dispatch(Palettes.clear);
+    };
+    async function refresh() {
+      await store.dispatch(Palettes.clear);
+      await readDirectory(currentWorkspace.value);
+    };
+    return {refresh, clear, newpalette, onAddNewPalette, savePalettes, palettes, currentWorkspace, addNewPalette, xPalette, commands, sortOptions, onSortChange, sortKey, sortOrder, sortField, searchText, debug};
 
   },
 });

@@ -82,8 +82,6 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.CLEAR](state) {
     state.order = [];
-    state.palettes = {};
-    state.colors = {};
   },
   [MutationTypes.ADD_COLOR](state, payload) {
     state.colors[payload.color.id] = payload.color;

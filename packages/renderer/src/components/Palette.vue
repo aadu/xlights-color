@@ -1,5 +1,6 @@
 <template>
-  <Card class="p-mb-2 p-py-0 p-mx-2 palette">
+  <Card class="p-mb-2 p-py-0 p-mx-2 palette" :class="{'active-palette': highlight}"
+  >
     <template #title>
       <div class="p-d-flex p-ai-center">
         <Inplace
@@ -95,6 +96,7 @@ export default defineComponent({
     const drag = ref(false);
     const controlOnStart = ref(true);
     const active = ref(false);
+    const highlight = ref(false);
 
     // computed
     const store = useStore();
@@ -157,6 +159,9 @@ export default defineComponent({
       return new Color(color.value, cloneDeep(color.stops));
     }
     const commands = ref({
+      'highlight': ($event) => {
+        highlight.value = $event;
+      },
       'save:palette': () => {
         emit('save:palette', paletteId);
       },
@@ -210,8 +215,9 @@ export default defineComponent({
 
 
     return {
-      active,
       addColor,
+      active,
+      highlight,
       clone,
       colors,
       commands,
@@ -245,5 +251,8 @@ export default defineComponent({
 }
 .palette {
   width: 100%;
+}
+.active-palette {
+  background: lightyellow;
 }
 </style>
